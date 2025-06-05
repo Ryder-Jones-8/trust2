@@ -216,6 +216,58 @@ const categoryForms: CategoryForms = {
       { name: 'faceSize', label: 'Face Size', type: 'select', options: ['Small', 'Medium', 'Large'] },
       { name: 'lensType', label: 'Lens Type', type: 'select', options: ['Clear/Low light', 'All conditions', 'Sunny conditions', 'Interchangeable'] },
       { name: 'fitType', label: 'Fit Type', type: 'select', options: ['Asian fit', 'Standard fit', 'Wide fit'] }
+    ]  },
+  snow: {
+    snowboards: [
+      { name: 'height', label: 'Height', type: 'text', placeholder: "e.g. 5'10\"" },
+      { name: 'weight', label: 'Weight', type: 'text', placeholder: 'e.g. 170 lbs' },
+      { name: 'bootSize', label: 'Boot Size', type: 'text', placeholder: 'e.g. 10' },
+      { name: 'experience', label: 'Experience Level', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
+      { name: 'ridingStyle', label: 'Riding Style', type: 'select', options: ['All-mountain', 'Freestyle', 'Freeride', 'Powder'] },
+      { name: 'terrain', label: 'Preferred Terrain', type: 'select', options: ['Groomed runs', 'Park & pipe', 'Backcountry', 'Mixed terrain'] }
+    ],
+    skis: [
+      { name: 'height', label: 'Height', type: 'text', placeholder: "e.g. 5'10\"" },
+      { name: 'weight', label: 'Weight', type: 'text', placeholder: 'e.g. 170 lbs' },
+      { name: 'bootSize', label: 'Boot Size', type: 'text', placeholder: 'e.g. 27.5' },
+      { name: 'experience', label: 'Experience Level', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
+      { name: 'skiType', label: 'Ski Type', type: 'select', options: ['All-mountain', 'Carving', 'Freestyle', 'Touring', 'Racing'] },
+      { name: 'terrain', label: 'Preferred Terrain', type: 'select', options: ['Groomed runs', 'Off-piste', 'Park', 'Backcountry'] }
+    ],
+    boots: [
+      { name: 'footLength', label: 'Foot Length (cm)', type: 'text', placeholder: 'e.g. 28.5' },
+      { name: 'footWidth', label: 'Foot Width', type: 'select', options: ['Narrow', 'Medium', 'Wide'] },
+      { name: 'experience', label: 'Experience Level', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
+      { name: 'flex', label: 'Preferred Flex', type: 'select', options: ['Soft (60-80)', 'Medium (80-100)', 'Stiff (100-120)', 'Very Stiff (120+)'] },
+      { name: 'volume', label: 'Foot Volume', type: 'select', options: ['Low volume', 'Medium volume', 'High volume'] }
+    ],
+    'snowboard boots': [
+      { name: 'footLength', label: 'Foot Length (inches)', type: 'text', placeholder: 'e.g. 11.2' },
+      { name: 'footWidth', label: 'Foot Width', type: 'select', options: ['Narrow', 'Medium', 'Wide'] },
+      { name: 'experience', label: 'Experience Level', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
+      { name: 'flex', label: 'Preferred Flex', type: 'select', options: ['Soft (3-5)', 'Medium (5-7)', 'Stiff (7-9)', 'Very Stiff (9-10)'] },
+      { name: 'lacingSystem', label: 'Lacing System', type: 'select', options: ['Traditional laces', 'BOA system', 'Speed lacing', 'Hybrid'] },
+      { name: 'ridingStyle', label: 'Riding Style', type: 'select', options: ['All-mountain', 'Freestyle', 'Freeride', 'Powder'] },
+      { name: 'volume', label: 'Foot Volume', type: 'select', options: ['Low volume', 'Medium volume', 'High volume'] }
+    ],
+    'ski boots': [
+      { name: 'footLength', label: 'Foot Length (inches)', type: 'text', placeholder: 'e.g. 11.2' },
+      { name: 'footWidth', label: 'Foot Width', type: 'select', options: ['Narrow (3.9-3.94")', 'Medium (3.94-4.02")', 'Wide (4.02-4.17")', 'Extra Wide (4.17"+)'] },
+      { name: 'experience', label: 'Experience Level', type: 'select', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
+      { name: 'flex', label: 'Flex Rating', type: 'select', options: ['Soft (60-80)', 'Medium (80-100)', 'Stiff (100-120)', 'Very Stiff (120-140)', 'Race (140+)'] },
+      { name: 'skiType', label: 'Ski Type', type: 'select', options: ['All-mountain', 'Carving', 'Racing', 'Touring', 'Freestyle'] },
+      { name: 'calfWidth', label: 'Calf Width', type: 'select', options: ['Narrow', 'Medium', 'Wide'] },
+      { name: 'volume', label: 'Foot Volume', type: 'select', options: ['Low volume', 'Medium volume', 'High volume'] }
+    ],
+    helmets: [
+      { name: 'headCircumference', label: 'Head Circumference (inches)', type: 'text', placeholder: 'e.g. 22.8' },
+      { name: 'activity', label: 'Primary Activity', type: 'select', options: ['Alpine skiing', 'Snowboarding', 'Freestyle', 'Backcountry'] },
+      { name: 'features', label: 'Desired Features', type: 'select', options: ['Basic protection', 'Ventilation system', 'Audio compatibility', 'Goggle integration'] }
+    ],
+    goggles: [
+      { name: 'faceSize', label: 'Face Size', type: 'select', options: ['Small', 'Medium', 'Large'] },
+      { name: 'lensType', label: 'Lens Type', type: 'select', options: ['Clear/Low light', 'All conditions', 'Sunny conditions', 'Interchangeable'] },
+      { name: 'fitType', label: 'Fit Type', type: 'select', options: ['Asian fit', 'Standard fit', 'Wide fit'] }
     ]
   },
   skate: {
