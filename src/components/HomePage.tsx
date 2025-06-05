@@ -40,13 +40,19 @@ const CenterLayout = styled.div`
   max-height: none;
 `
 
+const TitleContainer = styled.div`
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`
+
 const Title = styled.h1`
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 100;
   letter-spacing: 0.3em;
   color: ${props => props.theme.colors.text};
-  position: absolute;
-  z-index: 2;
   margin: 0;
   opacity: 0.95;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
@@ -56,6 +62,12 @@ const ClickablePeriod = styled.span`
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-block;
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 100;
+  color: ${props => props.theme.colors.text};
+  opacity: 0.95;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  margin-left: -0.15em; /* Adjust spacing to account for letter-spacing */
   
   &:hover {
     opacity: 0.7;
@@ -210,11 +222,11 @@ const HomePage = () => {
   }
   
   return (
-    <HomeContainer>
-      <CenterLayout>
-        <Title>
-          trust<ClickablePeriod onClick={handleEmployeeLogin}>.</ClickablePeriod>
-        </Title>          {/* Surfboard Icon - Top */}        <SportIcon 
+    <HomeContainer>      <CenterLayout>
+        <TitleContainer>
+          <Title>trust</Title>
+          <ClickablePeriod onClick={handleEmployeeLogin}>.</ClickablePeriod>
+        </TitleContainer>{/* Surfboard Icon - Top */}        <SportIcon 
           position="top" 
           onClick={() => handleSportClick('surf')}
           title="surf"
@@ -224,34 +236,75 @@ const HomePage = () => {
             {/* Center stringer line */}
             <path d="M12 3 L12 20" strokeWidth="0.5"/>
           </IconSvg>
-        </SportIcon>        {/* Snowboard Icon - Bottom Left */}        <SportIcon 
+        </SportIcon>        {/* Snowflake Icon - Bottom Left */}        <SportIcon 
           position="bottom-left" 
           onClick={() => handleSportClick('snow')}
           title="snow"
         >
           <IconSvg viewBox="0 0 24 24">
-            {/* Main snowboard outline - wider and smoother than surfboard */}
-            <path d="M12 3 C10 3 8.5 4 8.5 5.5 L8.5 18.5 C8.5 20 10 21 12 21 C14 21 15.5 20 15.5 18.5 L15.5 5.5 C15.5 4 14 3 12 3 Z"/>
-            {/* Center line */}
-            <path d="M12 4 L12 20" strokeWidth="0.5"/>
-            {/* Front binding */}
-            <rect x="9.5" y="8.5" width="5" height="1.2" rx="0.6"/>
-            {/* Back binding */}
-            <rect x="9.5" y="14.3" width="5" height="1.2" rx="0.6"/>
+            {/* Main cross lines */}
+            <path d="M12 1 L12 23" strokeWidth="1.2"/>
+            <path d="M1 12 L23 12" strokeWidth="1.2"/>
+            <path d="M5.64 5.64 L18.36 18.36" strokeWidth="1.2"/>
+            <path d="M18.36 5.64 L5.64 18.36" strokeWidth="1.2"/>
+            
+            {/* Inner diamond pattern */}
+            <path d="M12 6 L9 9 L12 12 L15 9 Z" strokeWidth="0.8" fill="none"/>
+            <path d="M12 12 L9 15 L12 18 L15 15 Z" strokeWidth="0.8" fill="none"/>
+            <path d="M6 12 L9 9 L12 12 L9 15 Z" strokeWidth="0.8" fill="none"/>
+            <path d="M12 12 L15 9 L18 12 L15 15 Z" strokeWidth="0.8" fill="none"/>            {/* Endpoint arrows - Top (pointing inward toward center) */}
+            <path d="M12 4 L10 2.5" strokeWidth="1"/>
+            <path d="M12 4 L14 2.5" strokeWidth="1"/>
+            <path d="M12 3.5 L11 2" strokeWidth="0.8"/>
+            <path d="M12 3.5 L13 2" strokeWidth="0.8"/>
+            
+            {/* Endpoint arrows - Bottom (pointing inward toward center) */}
+            <path d="M12 20 L10 21.5" strokeWidth="1"/>
+            <path d="M12 20 L14 21.5" strokeWidth="1"/>
+            <path d="M12 20.5 L11 22" strokeWidth="0.8"/>
+            <path d="M12 20.5 L13 22" strokeWidth="0.8"/>
+            
+            {/* Endpoint arrows - Left (pointing inward toward center) */}
+            <path d="M4 12 L2.5 10" strokeWidth="1"/>
+            <path d="M4 12 L2.5 14" strokeWidth="1"/>
+            <path d="M3.5 12 L2 11" strokeWidth="0.8"/>
+            <path d="M3.5 12 L2 13" strokeWidth="0.8"/>
+            
+            {/* Endpoint arrows - Right (pointing inward toward center) */}
+            <path d="M20 12 L21.5 10" strokeWidth="1"/>
+            <path d="M20 12 L21.5 14" strokeWidth="1"/>
+            <path d="M20.5 12 L22 11" strokeWidth="0.8"/>
+            <path d="M20.5 12 L22 13" strokeWidth="0.8"/>
+            
+            {/* Diagonal endpoint arrows - Top Left (pointing inward toward center) */}
+            <path d="M7.5 7.5 L6.5 6.5" strokeWidth="1"/>
+            <path d="M7.5 7.5 L6 7" strokeWidth="1"/>
+            
+            {/* Diagonal endpoint arrows - Top Right (pointing inward toward center) */}
+            <path d="M16.5 7.5 L17.5 6.5" strokeWidth="1"/>
+            <path d="M16.5 7.5 L18 7" strokeWidth="1"/>
+            
+            {/* Diagonal endpoint arrows - Bottom Left (pointing inward toward center) */}
+            <path d="M7.5 16.5 L6.5 17.5" strokeWidth="1"/>
+            <path d="M7.5 16.5 L6 17" strokeWidth="1"/>
+            
+            {/* Diagonal endpoint arrows - Bottom Right (pointing inward toward center) */}
+            <path d="M16.5 16.5 L17.5 17.5" strokeWidth="1"/>
+            <path d="M16.5 16.5 L18 17" strokeWidth="1"/>
           </IconSvg>
         </SportIcon>
           {/* Skateboard Icon - Bottom Right */}        <SportIcon 
           position="bottom-right" 
           onClick={() => handleSportClick('skate')}
           title="skate"        >          <IconSvg viewBox="0 0 24 24">
-            {/* Skateboard deck - side view as a simple line with slightly curved ends */}
-            <path d="M6 12 C6 11 7 10 8 10 L16 10 C17 10 18 11 18 12 C18 13 17 14 16 14 L8 14 C7 14 6 13 6 12 Z" strokeWidth="1.2"/>
+            {/* Penny board deck with upward-curved tail - side view */}
+            <path d="M6 11 C6.5 10.5 7 11 7.5 11.5 L15 11.5 C16 11.5 17 11.7 17.5 12 C18 12.3 17.7 12.5 17 12.5 L7.5 12.5 C7 12.5 6.5 12 6 11 Z" strokeWidth="1.5" fill="none"/>
             
-            {/* Front wheel */}
-            <circle cx="8.5" cy="16" r="1.5" fill="none" strokeWidth="0.8"/>
+            {/* Left wheels */}
+            <circle cx="8" cy="14.5" r="1" fill="none" strokeWidth="1"/>
             
-            {/* Back wheel */}
-            <circle cx="15.5" cy="16" r="1.5" fill="none" strokeWidth="0.8"/>
+            {/* Right wheels */}
+            <circle cx="16" cy="14.5" r="1" fill="none" strokeWidth="1"/>
           </IconSvg>
         </SportIcon>
       </CenterLayout>
