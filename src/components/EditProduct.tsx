@@ -342,6 +342,7 @@ const EditProduct: React.FC = () => {
         setError('Failed to load product');
       }
     } catch (err) {
+      console.error(err);
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -416,6 +417,7 @@ const EditProduct: React.FC = () => {
         setError(data.error || 'Failed to update product');
       }
     } catch (err) {
+      console.error(err);
       setError('Network error. Please try again.');
     } finally {
       setIsSaving(false);

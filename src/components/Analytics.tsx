@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
@@ -198,6 +198,11 @@ interface AnalyticsData {
   salesChange: number;
 }
 
+interface CategoryStats {
+  count: number;
+  value: number;
+}
+
 const Analytics: React.FC = () => {
   const navigate = useNavigate();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
@@ -210,10 +215,7 @@ const Analytics: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, []);
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -231,7 +233,8 @@ const Analytics: React.FC = () => {
         const data = await response.json();
         
         // Create mock top products from category breakdown
-        const topProducts = Object.entries(data.categoryBreakdown || {}).map(([category, stats]: [string, any], index) => ({
+        const categoryData = (data.categoryBreakdown || {}) as Record<string, CategoryStats>;
+        const topProducts = Object.entries(categoryData).map(([category, stats], index) => ({
           id: (index + 1).toString(),
           name: `Top ${category} Product`,
           category: category,
@@ -277,7 +280,11 @@ const Analytics: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [loadAnalyticsData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

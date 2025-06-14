@@ -129,9 +129,7 @@ const RegisterLink = styled.p`
   }
 `;
 
-interface EmployeeLoginProps {}
-
-const EmployeeLogin: React.FC<EmployeeLoginProps> = () => {
+const EmployeeLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -165,6 +163,7 @@ const EmployeeLogin: React.FC<EmployeeLoginProps> = () => {
         setError(data.error || data.message || 'Authentication failed');
       }
     } catch (err) {
+      console.error(err);
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);

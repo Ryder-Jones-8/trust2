@@ -206,11 +206,16 @@ interface ShopSettings {
   shopName: string;
   description: string;
   address: string;
+  location: string;
   phone: string;
   email: string;
   website: string;
+  businessHours: string;
   acceptsRecommendations: boolean;
   autoNotifyLowStock: boolean;
+  enableInventoryAlerts: boolean;
+  enableEmailNotifications: boolean;
+  enableSMSNotifications: boolean;
   lowStockThreshold: number;
 }
 
@@ -220,11 +225,16 @@ const ShopSettings: React.FC = () => {
     shopName: '',
     description: '',
     address: '',
+    location: '',
     phone: '',
     email: '',
     website: '',
+    businessHours: '',
     acceptsRecommendations: true,
     autoNotifyLowStock: true,
+    enableInventoryAlerts: true,
+    enableEmailNotifications: false,
+    enableSMSNotifications: false,
     lowStockThreshold: 5
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -351,7 +361,6 @@ const ShopSettings: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
       // In a real app, this would call the delete account API
       console.log('Account deletion requested');
       
@@ -361,6 +370,7 @@ const ShopSettings: React.FC = () => {
       localStorage.removeItem('shopSettings');
       navigate('/');
     } catch (error) {
+      console.error(error);
       setMessage({ type: 'error', text: 'Failed to delete account. Please contact support.' });
     }
   };
