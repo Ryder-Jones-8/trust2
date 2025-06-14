@@ -259,7 +259,7 @@ interface Product {
   category: string;
   sport: string;
   price: number;
-  stock: number;
+  quantity: number;
   brand?: string;
   size?: string;
 }
@@ -426,8 +426,8 @@ const ProductList: React.FC = () => {
               <ProductCard key={product.id}>
                 <ProductHeader>
                   <ProductName>{product.name}</ProductName>
-                  <StockBadge lowStock={product.stock < 5}>
-                    {product.stock} in stock
+                  <StockBadge lowStock={product.quantity < 5}>
+                    {product.quantity} in stock
                   </StockBadge>
                 </ProductHeader>
                 

@@ -350,7 +350,8 @@ const AddProduct: React.FC = () => {
       formDataToSend.append('category', formData.category);
       formDataToSend.append('sport', formData.sport);
       formDataToSend.append('price', formData.price);
-      formDataToSend.append('inventory_count', formData.stock);
+      // Backend expects the quantity field for inventory count
+      formDataToSend.append('quantity', formData.stock);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('features', JSON.stringify(formData.features.split(',').map(f => f.trim()).filter(f => f)));
       formDataToSend.append('specifications', JSON.stringify(specifications));
