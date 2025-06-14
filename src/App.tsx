@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components'
-import { HomePage, SportPage, CategoryPage, RecommendationPage, EmployeeLogin, AdminDashboard, AddProduct, ProductList, ShopSettings, Analytics, EditProduct } from './components'
+import { HomePage, SportPage, CategoryPage, RecommendationPage, EmployeeLogin, AdminDashboard, AddProduct, ProductList, ShopSettings, Analytics, EditProduct, ProtectedRoute } from './components'
 
 const darkTheme = {
   colors: {
@@ -61,12 +61,12 @@ function App() {
             <Route path="/sport/:sport/category/:category" element={<CategoryPage />} />
             <Route path="/recommendations" element={<RecommendationPage />} />
             <Route path="/login" element={<EmployeeLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/products/new" element={<AddProduct />} />
-            <Route path="/admin/products" element={<ProductList />} />
-            <Route path="/admin/products/edit/:id" element={<EditProduct />} />
-            <Route path="/admin/settings" element={<ShopSettings />} />
-            <Route path="/admin/analytics" element={<Analytics />} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/products/new" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
+            <Route path="/admin/products" element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
+            <Route path="/admin/products/edit/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute><ShopSettings /></ProtectedRoute>} />
+            <Route path="/admin/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           </Routes>
         </Router>
       </AppContainer>

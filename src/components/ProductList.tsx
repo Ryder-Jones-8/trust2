@@ -246,6 +246,16 @@ const EmptyState = styled.div`
   grid-column: 1 / -1;
 `;
 
+const ErrorMessage = styled.div`
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+`;
+
 const LoadingState = styled.div`
   text-align: center;
   padding: 3rem;
@@ -269,6 +279,7 @@ const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sportFilter, setSportFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -283,17 +294,30 @@ const ProductList: React.FC = () => {
 
   const loadProducts = async () => {
     try {
+      setError('');
       const token = localStorage.getItem('token');
+      console.log('Loading products with token:', token ? 'present' : 'missing');
+      
       const response = await fetch('http://localhost:3001/api/products', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      });      if (response.ok) {
+      });
+
+      console.log('Products API response status:', response.status);
+      
+      if (response.ok) {
         const data = await response.json();
+        console.log('Products loaded:', data.length, 'items');
         setProducts(data);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to load products:', response.status, errorData);
+        setError(`Failed to load products: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to load products:', error);
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -368,6 +392,8 @@ const ProductList: React.FC = () => {
       </Header>
       
       <Content>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        
         <FiltersSection>
           <FilterGroup>
             <FilterLabel>Search</FilterLabel>

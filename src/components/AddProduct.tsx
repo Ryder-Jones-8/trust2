@@ -343,7 +343,9 @@ const AddProduct: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-        // Create FormData for file upload
+      console.log('Submitting product with token:', token ? 'present' : 'missing');
+      
+      // Create FormData for file upload
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('brand', formData.brand);
@@ -361,6 +363,18 @@ const AddProduct: React.FC = () => {
         formDataToSend.append('image', imageFile);
       }
 
+      console.log('Form data being sent:', {
+        name: formData.name,
+        brand: formData.brand,
+        category: formData.category,
+        sport: formData.sport,
+        price: formData.price,
+        quantity: formData.stock,
+        description: formData.description,
+        specifications: specifications,
+        hasImage: !!imageFile
+      });
+
       const response = await fetch('http://localhost:3001/api/products', {
         method: 'POST',
         headers: {
@@ -371,9 +385,11 @@ const AddProduct: React.FC = () => {
       });
 
       const data = await response.json();
+      console.log('API Response:', response.status, data);
 
       if (response.ok) {
         setSuccess('Product added successfully!');
+        // Reset form
         setFormData({
           name: '',
           sport: '',
@@ -388,6 +404,10 @@ const AddProduct: React.FC = () => {
         setSpecifications({});
         setImageFile(null);
         setImagePreview(null);
+        // Optionally navigate back to product list after success
+        setTimeout(() => {
+          navigate('/admin/products');
+        }, 2000);
       } else {
         console.error('API Error Response:', data);
         setError(data.error || data.message || `Failed to add product (${response.status})`);
