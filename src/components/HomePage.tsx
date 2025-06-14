@@ -182,6 +182,57 @@ const ShopStatusIndicator = styled.div`
   }
 `
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+`
+
+const PasswordModal = styled.form`
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`
+
+const PasswordInput = styled.input`
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #fff;
+`
+
+const ModalButtonRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+`
+
+const ModalButton = styled.button`
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #ffffff;
+  color: #000000;
+  &:hover {
+    background: #f0f0f0;
+  }
+`
+
 interface ShopOwner {
   id: string;
   email: string;
@@ -191,6 +242,9 @@ interface ShopOwner {
 const HomePage = () => {
   const navigate = useNavigate()
   const [shopOwner, setShopOwner] = useState<ShopOwner | null>(null)
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     // Check if user is logged in as shop owner
@@ -217,7 +271,32 @@ const HomePage = () => {
 
   const handleShopStatusClick = () => {
     if (shopOwner) {
-      navigate('/admin')
+      setShowPasswordPrompt(true)
+    }
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!shopOwner) return
+    setError('')
+    try {
+      const response = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: shopOwner.email, password })
+      })
+      const data = await response.json()
+      if (response.ok) {
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('shopOwner', JSON.stringify(data.shop))
+        setShowPasswordPrompt(false)
+        setPassword('')
+        navigate('/admin')
+      } else {
+        setError(data.error || 'Authentication failed')
+      }
+    } catch {
+      setError('Network error')
     }
   }
   
@@ -312,6 +391,26 @@ const HomePage = () => {
         <ShopStatusIndicator onClick={handleShopStatusClick}>
           {shopOwner.name}
         </ShopStatusIndicator>
+      )}
+      {showPasswordPrompt && (
+        <ModalOverlay>
+          <PasswordModal onSubmit={handlePasswordSubmit}>
+            <div style={{ color: '#fff' }}>Enter password for {shopOwner?.name}</div>
+            <PasswordInput
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoFocus
+            />
+            {error && <div style={{ color: '#ff6b6b', fontSize: '0.9rem' }}>{error}</div>}
+            <ModalButtonRow>
+              <ModalButton type="button" onClick={() => { setShowPasswordPrompt(false); setPassword(''); setError(''); }}>
+                Cancel
+              </ModalButton>
+              <ModalButton type="submit">Enter</ModalButton>
+            </ModalButtonRow>
+          </PasswordModal>
+        </ModalOverlay>
       )}
     </HomeContainer>
   )
