@@ -678,6 +678,209 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
           }
         ],
         tip: "💡 Pro Tip: Beginners should prioritize ease of turning over stability - choose skis on the shorter end of your range."
+      },
+      'snowboard boots': {
+        title: "🥾 What to Look for in Snowboard Boots",
+        guides: [
+          {
+            title: "👣 Fit & Sizing",
+            content: (
+              <div>
+                <p><strong>Proper fit is everything:</strong> Based on your foot length ({formData.footLength}) and width ({formData.footWidth}).</p>
+                <ul>
+                  <li><strong>Length:</strong> Toes should barely touch the front when standing</li>
+                  <li><strong>Width:</strong> Snug but not pinching on the sides</li>
+                  <li><strong>Heel hold:</strong> No lifting when flexing forward</li>
+                  <li><strong>Volume:</strong> Match your foot's {formData.volume} needs</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "💪 Flex & Response",
+            content: (
+              <div>
+                <p><strong>Flex affects your riding:</strong></p>
+                <ul>
+                  <li><strong>Soft (3-5):</strong> Forgiving, easy turn initiation, park riding</li>
+                  <li><strong>Medium (5-7):</strong> Versatile, all-mountain performance</li>
+                  <li><strong>Stiff (7-9):</strong> Responsive, aggressive riding, racing</li>
+                  <li><strong>Very Stiff (9-10):</strong> Competition level, expert riders</li>
+                </ul>
+                <p>For {formData.experience} {formData.ridingStyle} riding, consider {formData.experience === 'Beginner' ? 'soft to medium' : formData.experience === 'Advanced' ? 'medium to stiff' : 'medium'} flex.</p>
+              </div>
+            )
+          },
+          {
+            title: "🔗 Lacing Systems",
+            content: (
+              <div>
+                <p><strong>Choose your closure system:</strong></p>
+                <ul>
+                  <li><strong>Traditional Laces:</strong> Customizable, reliable, budget-friendly</li>
+                  <li><strong>BOA System:</strong> Quick, even pressure, easy with gloves</li>
+                  <li><strong>Speed Lacing:</strong> Fast, good power transfer</li>
+                  <li><strong>Hybrid:</strong> Combines multiple systems for best of both</li>
+                </ul>
+                <p>Your {formData.lacingSystem} preference offers the right balance for your needs.</p>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Boots pack out (get bigger) over time, so choose a snug fit initially - they'll mold to your feet perfectly."
+      },
+      'ski boots': {
+        title: "👢 What to Look for in Ski Boots",
+        guides: [
+          {
+            title: "📏 Sizing & Last Width",
+            content: (
+              <div>
+                <p><strong>Critical measurements:</strong> Foot length ({formData.footLength}) and width ({formData.footWidth}).</p>
+                <ul>
+                  <li><strong>Mondo sizing:</strong> Length in centimeters (most accurate)</li>
+                  <li><strong>Last width:</strong> The boot's internal width</li>
+                  <li><strong>Narrow:</strong> 98-100mm last width</li>
+                  <li><strong>Medium:</strong> 100-102mm last width</li>
+                  <li><strong>Wide:</strong> 102-106mm last width</li>
+                </ul>
+                <p>Your {formData.footWidth} feet need a {formData.footWidth === 'Narrow' ? '98-100mm' : formData.footWidth === 'Wide' ? '102-106mm' : '100-102mm'} last width.</p>
+              </div>
+            )
+          },
+          {
+            title: "⚡ Flex Rating",
+            content: (
+              <div>
+                <p><strong>Flex determines responsiveness:</strong></p>
+                <ul>
+                  <li><strong>Soft (60-80):</strong> Forgiving, comfortable, beginner-friendly</li>
+                  <li><strong>Medium (80-100):</strong> Versatile, progressive, intermediate</li>
+                  <li><strong>Stiff (100-120):</strong> Responsive, performance-oriented</li>
+                  <li><strong>Very Stiff (120-140):</strong> Racing, expert level</li>
+                  <li><strong>Race (140+):</strong> Competition, maximum precision</li>
+                </ul>
+                <p>For {formData.experience} {formData.skiType} skiing, {formData.flex} flex is ideal.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎿 Features & Technology",
+            content: (
+              <div>
+                <p><strong>Modern ski boot features:</strong></p>
+                <ul>
+                  <li><strong>Heat moldable liners:</strong> Custom fit to your foot shape</li>
+                  <li><strong>Micro-adjustable buckles:</strong> Precise fit adjustments</li>
+                  <li><strong>Cuff adjustment:</strong> Forward lean and lateral canting</li>
+                  <li><strong>Walk mode:</strong> For touring and easier walking</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Get your boots fitted by a professional - proper fitting can make the difference between a great day and a miserable one on the mountain."
+      },
+      helmets: {
+        title: "⛑️ What to Look for in a Ski/Snowboard Helmet",
+        guides: [
+          {
+            title: "📐 Size & Fit",
+            content: (
+              <div>
+                <p><strong>Measure your head circumference:</strong> {formData.headCircumference} inches determines your size.</p>
+                <ul>
+                  <li><strong>Small:</strong> 20.5-21.75 inches (52-55cm)</li>
+                  <li><strong>Medium:</strong> 21.75-23 inches (55-59cm)</li>
+                  <li><strong>Large:</strong> 23-24.5 inches (59-62cm)</li>
+                  <li><strong>X-Large:</strong> 24.5+ inches (62cm+)</li>
+                </ul>
+                <p>Helmet should sit level on your head, not tilted back or forward.</p>
+              </div>
+            )
+          },
+          {
+            title: "❄️ Ventilation & Comfort",
+            content: (
+              <div>
+                <p><strong>Stay comfortable all day:</strong></p>
+                <ul>
+                  <li><strong>Adjustable vents:</strong> Control airflow for temperature</li>
+                  <li><strong>Moisture-wicking liner:</strong> Keeps head dry</li>
+                  <li><strong>Dial fit system:</strong> Fine-tune fit on the mountain</li>
+                  <li><strong>Goggle compatibility:</strong> Seamless integration with your goggles</li>
+                </ul>
+                <p>For {formData.activity}, prioritize {formData.activity === 'Freestyle' ? 'lightweight protection with good venting' : formData.activity === 'Backcountry' ? 'ventilation and compatibility with other gear' : 'all-around comfort and protection'}.</p>
+              </div>
+            )
+          },
+          {
+            title: "🛡️ Safety & Certification",
+            content: (
+              <div>
+                <p><strong>Protection standards:</strong></p>
+                <ul>
+                  <li><strong>MIPS technology:</strong> Multi-directional impact protection</li>
+                  <li><strong>CE EN 1077:</strong> European safety standard</li>
+                  <li><strong>ASTM F2040:</strong> American safety standard</li>
+                  <li><strong>Construction:</strong> In-mold vs hard shell</li>
+                </ul>
+                <p>Your {formData.features} requirements suggest looking for {String(formData.features)?.includes('Basic') ? 'certified protection with good value' : 'advanced features and premium protection'}.</p>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Replace your helmet after any significant impact, even if there's no visible damage - the protective foam compresses and loses effectiveness."
+      },
+      goggles: {
+        title: "🥽 What to Look for in Ski/Snowboard Goggles",
+        guides: [
+          {
+            title: "👀 Fit & Face Shape",
+            content: (
+              <div>
+                <p><strong>Match your face size ({formData.faceSize}) and shape:</strong></p>
+                <ul>
+                  <li><strong>Small:</strong> Narrow faces, smaller features</li>
+                  <li><strong>Medium:</strong> Average face width and height</li>
+                  <li><strong>Large:</strong> Wider faces, larger features</li>
+                  <li><strong>Fit types:</strong> Asian fit (flatter bridge), Wide fit (broader faces)</li>
+                </ul>
+                <p>Your {formData.fitType} facial structure needs {formData.fitType === 'Asian fit' ? 'goggles with a lower nose bridge' : formData.fitType === 'Wide fit' ? 'goggles with a wider frame' : 'standard fit goggles'}.</p>
+              </div>
+            )
+          },
+          {
+            title: "🌤️ Lens Technology",
+            content: (
+              <div>
+                <p><strong>Choose lens for your conditions:</strong></p>
+                <ul>
+                  <li><strong>Clear/Low light:</strong> Stormy days, night skiing (85-95% VLT)</li>
+                  <li><strong>All conditions:</strong> Variable light, overcast (15-60% VLT)</li>
+                  <li><strong>Sunny conditions:</strong> Bright days, high UV (5-20% VLT)</li>
+                  <li><strong>Interchangeable:</strong> Multiple lenses for any condition</li>
+                </ul>
+                <p>Your {formData.lensType} preference is perfect for the conditions you'll face most often.</p>
+              </div>
+            )
+          },
+          {
+            title: "💨 Anti-Fog & Features",
+            content: (
+              <div>
+                <p><strong>Stay fog-free all day:</strong></p>
+                <ul>
+                  <li><strong>Double lens:</strong> Thermal barrier prevents fogging</li>
+                  <li><strong>Anti-fog coating:</strong> Chemical treatment on inner lens</li>
+                  <li><strong>Ventilation:</strong> Strategic vents for airflow</li>
+                  <li><strong>Helmet integration:</strong> Seamless fit with your helmet</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Never wipe the inside of your goggles - it removes the anti-fog coating. Instead, let them air dry or gently shake off moisture."
       }
     },
     surf: {
@@ -726,6 +929,107 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
           }
         ],
         tip: "💡 Pro Tip: When in doubt, choose a board with more volume rather than less - it's easier to surf a board that's slightly too big than too small."
+      },
+      wetsuits: {
+        title: "🌊 What to Look for in a Wetsuit",
+        guides: [
+          {
+            title: "📏 Size & Fit",
+            content: (
+              <div>
+                <p><strong>Perfect fit is crucial:</strong> Height ({formData.height}), weight ({formData.weight}), and chest size ({formData.chestSize}) determine your size.</p>
+                <ul>
+                  <li><strong>Snug but not restrictive:</strong> Should feel like a second skin</li>
+                  <li><strong>No gaps:</strong> Especially at neck, wrists, and ankles</li>
+                  <li><strong>Full range of motion:</strong> Test arm and leg movement</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "🌡️ Thickness for Water Temperature",
+            content: (
+              <div>
+                <p><strong>Choose thickness based on your water conditions:</strong></p>
+                <ul>
+                  <li><strong>2mm:</strong> 70°F+ warm water, summer use</li>
+                  <li><strong>3/2mm:</strong> 60-70°F spring/fall conditions</li>
+                  <li><strong>4/3mm:</strong> 50-60°F winter surfing</li>
+                  <li><strong>5/4mm:</strong> 45-55°F cold water conditions</li>
+                  <li><strong>6/5mm+:</strong> Below 45°F extreme cold</li>
+                </ul>
+                <p>For {formData.waterTemp} water, a {String(formData.waterTemp)?.includes('Warm') ? '2mm' : String(formData.waterTemp)?.includes('Moderate') ? '3/2mm' : String(formData.waterTemp)?.includes('Cool') ? '4/3mm' : '5/4mm+'} thickness is ideal.</p>
+              </div>
+            )
+          },
+          {
+            title: "🧵 Construction & Features",
+            content: (
+              <div>
+                <p><strong>Key construction details:</strong></p>
+                <ul>
+                  <li><strong>Seam construction:</strong> Flatlock (budget), GBS (better), Sealed/Taped (best)</li>
+                  <li><strong>Neoprene quality:</strong> Limestone vs petroleum-based</li>
+                  <li><strong>Zip placement:</strong> Back zip (traditional), chest zip (warmer), zipless (warmest)</li>
+                  <li><strong>Knee pads:</strong> Essential for durability</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Try on wetsuits in the afternoon when your body is slightly larger - this ensures the perfect fit for all-day sessions."
+      },
+      fins: {
+        title: "🔱 What to Look for in Surfboard Fins",
+        guides: [
+          {
+            title: "📐 Fin Setup & Configuration",
+            content: (
+              <div>
+                <p><strong>Choose setup based on your board ({formData.boardType}) and style:</strong></p>
+                <ul>
+                  <li><strong>Single Fin:</strong> Classic longboard feel, smooth turns</li>
+                  <li><strong>Twin Fin:</strong> Loose, skatey feel, great for smaller waves</li>
+                  <li><strong>Thruster (3-fin):</strong> Most popular, balanced performance</li>
+                  <li><strong>Quad (4-fin):</strong> Speed and drive, less drag</li>
+                  <li><strong>2+1:</strong> Versatile longboard option</li>
+                </ul>
+                <p>Your {formData.finSetup} preference matches your {formData.surfStyle} style perfectly.</p>
+              </div>
+            )
+          },
+          {
+            title: "📏 Fin Size & Template",
+            content: (
+              <div>
+                <p><strong>Size affects performance:</strong></p>
+                <ul>
+                  <li><strong>Larger fins:</strong> More hold, stability, better for bigger waves</li>
+                  <li><strong>Smaller fins:</strong> More release, maneuverability, better for smaller waves</li>
+                  <li><strong>Rake (swept back):</strong> Smoother turns, more drive</li>
+                  <li><strong>Upright:</strong> Quicker turns, more responsive</li>
+                </ul>
+                <p>For {formData.waveType}, consider {String(formData.waveType)?.includes('Small') ? 'smaller, more upright fins' : String(formData.waveType)?.includes('Powerful') ? 'larger fins with more rake' : 'medium-sized, versatile fins'}.</p>
+              </div>
+            )
+          },
+          {
+            title: "🪵 Materials & Construction",
+            content: (
+              <div>
+                <p><strong>Material affects feel and performance:</strong></p>
+                <ul>
+                  <li><strong>Fiberglass:</strong> Stiff, responsive, traditional feel</li>
+                  <li><strong>Plastic:</strong> Flexible, forgiving, great for beginners</li>
+                  <li><strong>Carbon Fiber:</strong> Ultra-responsive, high performance</li>
+                  <li><strong>Bamboo:</strong> Eco-friendly, good flex characteristics</li>
+                </ul>
+                <p>Your {formData.finMaterial} preference aligns with your {formData.experience} level.</p>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Start with plastic fins if you're learning - they're safer and more forgiving, plus they won't break the bank if you lose one."
       }
     },
     skate: {
@@ -774,6 +1078,155 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
           }
         ],
         tip: "💡 Pro Tip: Start with a standard 8.0\" popsicle deck if you're unsure - it's the most versatile size for learning."
+      },
+      trucks: {
+        title: "🔧 What to Look for in Skateboard Trucks",
+        guides: [
+          {
+            title: "📏 Truck Width & Sizing",
+            content: (
+              <div>
+                <p><strong>Match your deck width ({formData.deckWidth}):</strong></p>
+                <ul>
+                  <li><strong>Truck width should match deck width:</strong> Axle should align with deck edges</li>
+                  <li><strong>Too narrow:</strong> Unstable, poor performance</li>
+                  <li><strong>Too wide:</strong> Awkward foot placement, harder to flip</li>
+                  <li><strong>Hanger measurement:</strong> The actual width specification</li>
+                </ul>
+                <p>For your {formData.deckWidth} deck, choose trucks with matching hanger width.</p>
+              </div>
+            )
+          },
+          {
+            title: "⛰️ Truck Height",
+            content: (
+              <div>
+                <p><strong>Height affects your ride:</strong></p>
+                <ul>
+                  <li><strong>Low trucks:</strong> More stable, better for street skating and technical tricks</li>
+                  <li><strong>Mid trucks:</strong> Balanced performance, versatile for most skating</li>
+                  <li><strong>High trucks:</strong> More clearance, better for larger wheels and cruising</li>
+                </ul>
+                <p>Your {formData.ridingStyle} style works best with {formData.ridingStyle === 'Street' ? 'low to mid' : formData.ridingStyle === 'Vert' ? 'mid to high' : formData.ridingStyle === 'Cruising' ? 'high' : 'mid'} height trucks.</p>
+              </div>
+            )
+          },
+          {
+            title: "🔩 Construction & Materials",
+            content: (
+              <div>
+                <p><strong>Quality and durability matter:</strong></p>
+                <ul>
+                  <li><strong>Aluminum construction:</strong> Lightweight, strong, standard choice</li>
+                  <li><strong>Steel axles:</strong> Durable, long-lasting</li>
+                  <li><strong>Kingpin angle:</strong> Affects turning characteristics</li>
+                  <li><strong>Baseplate:</strong> Mounting angle and strength</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Quality trucks last for years - invest in good ones from established brands like Independent, Thunder, or Venture."
+      },
+      wheels: {
+        title: "⚙️ What to Look for in Skateboard Wheels",
+        guides: [
+          {
+            title: "📐 Wheel Size & Diameter",
+            content: (
+              <div>
+                <p><strong>Size affects performance:</strong></p>
+                <ul>
+                  <li><strong>50-53mm:</strong> Street skating, flip tricks, technical riding</li>
+                  <li><strong>54-58mm:</strong> All-around skating, good balance</li>
+                  <li><strong>59mm+:</strong> Cruising, transportation, rough surfaces</li>
+                </ul>
+                <p>Your {formData.ridingStyle} preference suggests {formData.wheelSize} wheels for optimal performance.</p>
+              </div>
+            )
+          },
+          {
+            title: "🏗️ Durometer (Hardness)",
+            content: (
+              <div>
+                <p><strong>Hardness affects ride quality:</strong></p>
+                <ul>
+                  <li><strong>78A-87A:</strong> Soft, smooth ride, good for cruising and rough surfaces</li>
+                  <li><strong>88A-95A:</strong> Medium, versatile for street and park</li>
+                  <li><strong>96A-101A:</strong> Hard, sliding and tricks, smooth surfaces only</li>
+                  <li><strong>101A+:</strong> Very hard, advanced technical skating</li>
+                </ul>
+                <p>For {formData.surface}, consider {String(formData.surface)?.includes('Rough') ? 'softer wheels (78A-87A)' : String(formData.surface)?.includes('Smooth') ? 'harder wheels (96A+)' : 'medium durometer wheels (88A-95A)'}.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎯 Shape & Contact Patch",
+            content: (
+              <div>
+                <p><strong>Wheel shape affects performance:</strong></p>
+                <ul>
+                  <li><strong>Wide contact patch:</strong> More grip, better for cruising</li>
+                  <li><strong>Narrow contact patch:</strong> Less friction, easier for tricks</li>
+                  <li><strong>Rounded edges:</strong> Smooth turning and sliding</li>
+                  <li><strong>Square edges:</strong> More grip when needed</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Have different sets of wheels for different activities - soft for cruising, hard for street tricks, and medium for all-around skating."
+      },
+      helmets: {
+        title: "⛑️ What to Look for in a Skateboard Helmet",
+        guides: [
+          {
+            title: "📏 Sizing & Fit",
+            content: (
+              <div>
+                <p><strong>Measure your head circumference:</strong> {formData.headCircumference}cm determines your size.</p>
+                <ul>
+                  <li><strong>Small:</strong> 51-55cm circumference</li>
+                  <li><strong>Medium:</strong> 55-59cm circumference</li>
+                  <li><strong>Large:</strong> 59-63cm circumference</li>
+                  <li><strong>Snug fit:</strong> Should not move when you shake your head</li>
+                </ul>
+                <p>Helmet should sit level on your head, covering the forehead.</p>
+              </div>
+            )
+          },
+          {
+            title: "🛡️ Safety Certifications",
+            content: (
+              <div>
+                <p><strong>Choose proper certification for your skating:</strong></p>
+                <ul>
+                  <li><strong>CPSC:</strong> Basic bicycle helmet standard</li>
+                  <li><strong>ASTM F1492:</strong> Skateboarding specific standard</li>
+                  <li><strong>Dual Certified:</strong> Meets both CPSC and ASTM (best choice)</li>
+                  <li><strong>MIPS:</strong> Additional rotational impact protection</li>
+                </ul>
+                <p>Your {formData.certifications} preference provides {formData.certifications === 'CPSC (Basic)' ? 'basic protection' : formData.certifications === 'ASTM (Skate specific)' ? 'skateboard-optimized protection' : 'comprehensive protection for all activities'}.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎨 Style & Ventilation",
+            content: (
+              <div>
+                <p><strong>Comfort and style for your skating:</strong></p>
+                <ul>
+                  <li><strong>Classic skate style:</strong> Lower profile, street aesthetic</li>
+                  <li><strong>BMX style:</strong> More coverage, better for vert</li>
+                  <li><strong>Ventilation:</strong> Multiple vents for cooling</li>
+                  <li><strong>Adjustable fit system:</strong> Dial or strap adjustments</li>
+                </ul>
+                <p>For {formData.skateStyle} skating, prioritize {formData.skateStyle === 'Street' ? 'low-profile style with good venting' : formData.skateStyle === 'Vert' ? 'maximum coverage and protection' : 'comfort and all-around protection'}.</p>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: A good helmet is a one-time investment in your safety - replace it after any significant impact or every few years of regular use."
       }
     }
   };
