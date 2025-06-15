@@ -11,6 +11,53 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'trust_secret_key_2024';
 
+// Helper function to parse price range
+function parsePriceRange(priceRange) {
+  if (!priceRange || priceRange === 'No preference') {
+    return { min: 0, max: Infinity };
+  }
+  
+  const ranges = {
+    'Under $25': { min: 0, max: 25 },
+    'Under $30': { min: 0, max: 30 },
+    'Under $50': { min: 0, max: 50 },
+    'Under $100': { min: 0, max: 100 },
+    'Under $200': { min: 0, max: 200 },
+    'Under $300': { min: 0, max: 300 },
+    '$25 - $50': { min: 25, max: 50 },
+    '$30 - $50': { min: 30, max: 50 },
+    '$50 - $80': { min: 50, max: 80 },
+    '$50 - $100': { min: 50, max: 100 },
+    '$80 - $120': { min: 80, max: 120 },
+    '$100 - $150': { min: 100, max: 150 },
+    '$100 - $200': { min: 100, max: 200 },
+    '$120 - $180': { min: 120, max: 180 },
+    '$150 - $250': { min: 150, max: 250 },
+    '$200 - $300': { min: 200, max: 300 },
+    '$200 - $400': { min: 200, max: 400 },
+    '$300 - $500': { min: 300, max: 500 },
+    '$400 - $600': { min: 400, max: 600 },
+    '$500 - $700': { min: 500, max: 700 },
+    '$600 - $800': { min: 600, max: 800 },
+    '$700 - $900': { min: 700, max: 900 },
+    '$20 - $40': { min: 20, max: 40 },
+    '$40 - $60': { min: 40, max: 60 },
+    '$60 - $80': { min: 60, max: 80 },
+    '$180+': { min: 180, max: Infinity },
+    '$250+': { min: 250, max: Infinity },
+    '$300+': { min: 300, max: Infinity },
+    '$500+': { min: 500, max: Infinity },
+    '$800+': { min: 800, max: Infinity },
+    '$900+': { min: 900, max: Infinity },
+    '$80+': { min: 80, max: Infinity },
+    '$120+': { min: 120, max: Infinity },
+    '$150+': { min: 150, max: Infinity },
+    '$1000+': { min: 1000, max: Infinity }
+  };
+  
+  return ranges[priceRange] || { min: 0, max: Infinity };
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -466,29 +513,73 @@ app.post('/api/recommendations', async (req, res) => {
     if (shopId) {
       recommendationQuery += ` AND shop_id = $${params.length + 1}`;
       params.push(shopId);
+    }    // Parse price range from formData
+    const priceRange = formData.priceRange;
+    const { min: minPrice, max: maxPrice } = parsePriceRange(priceRange);
+    
+    // Only apply price filtering if a specific range is selected
+    if (priceRange && priceRange !== 'No preference') {
+      console.log('Applying price filter:', { priceRange, minPrice, maxPrice });
+      if (maxPrice === Infinity) {
+        recommendationQuery += ` AND price >= $${params.length + 1}`;
+        params.push(minPrice);
+      } else {
+        recommendationQuery += ` AND price BETWEEN $${params.length + 1} AND $${params.length + 2}`;
+        params.push(minPrice, maxPrice);
+      }
     }
 
     recommendationQuery += ' AND inventory_count > 0 ORDER BY RANDOM() LIMIT 10';
 
     console.log('Executing query:', recommendationQuery, 'with params:', params);
-    const recommendationsResult = await query(recommendationQuery, params);
-    console.log('Query returned', recommendationsResult.rows.length, 'products');
-    
-    const recommendations = recommendationsResult.rows.map(product => ({
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      sport: product.sport,
-      price: parseFloat(product.price),
-      description: product.description,
-      specifications: product.specifications,
-      image: product.image_url,
-      inStock: product.inventory_count > 0,
-      quantity: product.inventory_count,
-      score: Math.floor(Math.random() * 30) + 70, // Mock match score 70-100%
-      matchReasons: ['Good match for experience level', 'Price range match', 'Popular choice'],
-      features: Array.isArray(product.specifications?.features) ? product.specifications.features : []
-    }));
+    const recommendationsResult = await query(recommendationQuery, params);    console.log('Query returned', recommendationsResult.rows.length, 'products');
+      const recommendations = recommendationsResult.rows.map(product => {
+      const productPrice = parseFloat(product.price);
+      const matchReasons = [];
+      let baseScore = Math.floor(Math.random() * 20) + 70; // Base score 70-90%
+      
+      // Add generic match reasons based on form data
+      if (formData.experienceLevel) {
+        matchReasons.push('Good match for experience level');
+      }
+      
+      // Add price range match reason ONLY if price filtering was applied AND product is actually in range
+      if (priceRange && priceRange !== 'No preference') {
+        const { min: minPrice, max: maxPrice } = parsePriceRange(priceRange);
+        if (productPrice >= minPrice && (maxPrice === Infinity || productPrice <= maxPrice)) {
+          matchReasons.push('Fits your price range');
+          baseScore += 5; // Boost score for price match
+        }
+      }
+      
+      // Add other relevant match reasons based on form data
+      if (formData.skillLevel || formData.ridingStyle || formData.boardType || formData.terrainPreference) {
+        matchReasons.push('Matches your preferences');
+      }
+      
+      // Add popular choice as fallback or supplement
+      if (matchReasons.length === 0) {
+        matchReasons.push('Popular choice');
+      } else if (Math.random() > 0.5) {
+        matchReasons.push('Popular choice');
+      }
+      
+      return {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        sport: product.sport,
+        price: productPrice,
+        description: product.description,
+        specifications: product.specifications,
+        image: product.image_url,
+        inStock: product.inventory_count > 0,
+        quantity: product.inventory_count,
+        score: Math.min(baseScore, 100), // Cap score at 100%
+        matchReasons,
+        features: Array.isArray(product.specifications?.features) ? product.specifications.features : []
+      };
+    });
 
     // Update session with recommendations if session was stored
     try {
@@ -509,6 +600,53 @@ app.post('/api/recommendations', async (req, res) => {
     res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
+
+// Helper function to parse price range
+function parsePriceRange(priceRange) {
+  if (!priceRange || priceRange === 'No preference') {
+    return { min: 0, max: Infinity };
+  }
+  
+  const ranges = {
+    'Under $25': { min: 0, max: 25 },
+    'Under $30': { min: 0, max: 30 },
+    'Under $50': { min: 0, max: 50 },
+    'Under $100': { min: 0, max: 100 },
+    'Under $200': { min: 0, max: 200 },
+    'Under $300': { min: 0, max: 300 },
+    '$25 - $50': { min: 25, max: 50 },
+    '$30 - $50': { min: 30, max: 50 },
+    '$50 - $80': { min: 50, max: 80 },
+    '$50 - $100': { min: 50, max: 100 },
+    '$80 - $120': { min: 80, max: 120 },
+    '$100 - $150': { min: 100, max: 150 },
+    '$100 - $200': { min: 100, max: 200 },
+    '$120 - $180': { min: 120, max: 180 },
+    '$150 - $250': { min: 150, max: 250 },
+    '$200 - $300': { min: 200, max: 300 },
+    '$200 - $400': { min: 200, max: 400 },
+    '$300 - $500': { min: 300, max: 500 },
+    '$400 - $600': { min: 400, max: 600 },
+    '$500 - $700': { min: 500, max: 700 },
+    '$600 - $800': { min: 600, max: 800 },
+    '$700 - $900': { min: 700, max: 900 },
+    '$20 - $40': { min: 20, max: 40 },
+    '$40 - $60': { min: 40, max: 60 },
+    '$60 - $80': { min: 60, max: 80 },
+    '$180+': { min: 180, max: Infinity },
+    '$250+': { min: 250, max: Infinity },
+    '$300+': { min: 300, max: Infinity },
+    '$500+': { min: 500, max: Infinity },
+    '$800+': { min: 800, max: Infinity },
+    '$900+': { min: 900, max: Infinity },
+    '$80+': { min: 80, max: Infinity },
+    '$120+': { min: 120, max: Infinity },
+    '$150+': { min: 150, max: Infinity },
+    '$1000+': { min: 1000, max: Infinity }
+  };
+  
+  return ranges[priceRange] || { min: 0, max: Infinity };
+}
 
 // Analytics API - Updated to match frontend expectations
 app.get('/api/analytics/overview', authenticateToken, async (req, res) => {
