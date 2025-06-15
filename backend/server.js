@@ -196,6 +196,8 @@ app.get('/api/products', async (req, res) => {
             specifications: product.specifications,
             inStock: product.inventory_count > 0,
             quantity: product.inventory_count,
+            size: product.specifications?.size || '',
+            features: product.specifications?.features || [],
             image: product.image_url,
             createdAt: product.created_at,
             updatedAt: product.updated_at
@@ -239,6 +241,8 @@ app.get('/api/products', async (req, res) => {
       specifications: product.specifications,
       inStock: product.inventory_count > 0,
       quantity: product.inventory_count,
+      size: product.specifications?.size || '',
+      features: product.specifications?.features || [],
       image: product.image_url,
       createdAt: product.created_at,
       updatedAt: product.updated_at
@@ -324,9 +328,7 @@ app.get('/api/products/:id', authenticateToken, async (req, res) => {
     const result = await query(
       'SELECT * FROM products WHERE id = $1 AND shop_id = $2',
       [id, req.shop.id]
-    );
-
-    if (result.rows.length === 0) {
+    );    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
@@ -343,6 +345,8 @@ app.get('/api/products/:id', authenticateToken, async (req, res) => {
       specifications: product.specifications,
       inStock: product.inventory_count > 0,
       quantity: product.inventory_count,
+      size: product.specifications?.size || '',
+      features: product.specifications?.features || [],
       image: product.image_url,
       createdAt: product.created_at,
       updatedAt: product.updated_at
