@@ -306,7 +306,7 @@ const ProductList: React.FC = () => {
       console.log('🔍 DEBUG: Making request to http://localhost:3001/api/products');
       console.log('🔍 DEBUG: Request headers will include Authorization:', token ? 'YES' : 'NO');
       
-      const requestHeaders = {
+      const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json'
       };
       
@@ -355,13 +355,18 @@ const ProductList: React.FC = () => {
         console.error('❌ DEBUG: Error response body:', errorText);
         setError(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('💥 DEBUG: Network/Fetch error caught:', error);
-      console.error('💥 DEBUG: Error name:', error.name);
-      console.error('💥 DEBUG: Error message:', error.message);
-      console.error('💥 DEBUG: Error stack:', error.stack);
-      console.error('💥 DEBUG: Full error object:', error);
-      setError(`Network Error: ${error.message} (Check console for details)`);
+      if (error instanceof Error) {
+        console.error('💥 DEBUG: Error name:', error.name);
+        console.error('💥 DEBUG: Error message:', error.message);
+        console.error('💥 DEBUG: Error stack:', error.stack);
+        console.error('💥 DEBUG: Full error object:', error);
+        setError(`Network Error: ${error.message} (Check console for details)`);
+      } else {
+        console.error('💥 DEBUG: Non-Error value thrown');
+        setError('Network Error: Unknown error occurred');
+      }
     } finally {
       setIsLoading(false);
       console.log('🏁 DEBUG: loadProducts function completed');
