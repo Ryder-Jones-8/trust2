@@ -450,7 +450,7 @@ const AddProduct: React.FC = () => {
             </FormGroup>
             
             <FormGroup>
-              <Label htmlFor="brand">Brand</Label>
+              <Label htmlFor="brand">Brand *</Label>
               <Input
                 id="brand"
                 name="brand"
@@ -458,6 +458,7 @@ const AddProduct: React.FC = () => {
                 value={formData.brand}
                 onChange={handleInputChange}
                 placeholder="e.g., Burton, Patagonia"
+                required
               />
             </FormGroup>
             

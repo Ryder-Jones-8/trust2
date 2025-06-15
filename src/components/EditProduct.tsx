@@ -470,13 +470,14 @@ const EditProduct: React.FC = () => {
             </FormGroup>
             
             <FormGroup>
-              <Label>Brand</Label>
+              <Label>Brand *</Label>
               <Input
                 type="text"
                 name="brand"
                 value={formData.brand}
                 onChange={handleInputChange}
                 placeholder="Enter brand name"
+                required
               />
             </FormGroup>
             

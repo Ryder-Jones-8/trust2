@@ -182,13 +182,13 @@ app.get('/api/products', async (req, res) => {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
         const shopResult = await query('SELECT id FROM shops WHERE id = $1', [decoded.shopId]);
-        if (shopResult.rows.length > 0) {
-          // Authenticated - show shop's products
+        if (shopResult.rows.length > 0) {          // Authenticated - show shop's products
           const result = await query('SELECT * FROM products WHERE shop_id = $1 ORDER BY created_at DESC', [decoded.shopId]);
           const products = result.rows.map(product => ({
             id: product.id,
             shopId: product.shop_id,
             name: product.name,
+            brand: product.specifications?.brand || '',
             category: product.category,
             sport: product.sport,
             price: parseFloat(product.price),
@@ -226,13 +226,12 @@ app.get('/api/products', async (req, res) => {
       params.push(shopId);
     }
 
-    queryText += ' ORDER BY created_at DESC';
-
-    const result = await query(queryText, params);
+    queryText += ' ORDER BY created_at DESC';    const result = await query(queryText, params);
     const products = result.rows.map(product => ({
       id: product.id,
       shopId: product.shop_id,
       name: product.name,
+      brand: product.specifications?.brand || '',
       category: product.category,
       sport: product.sport,
       price: parseFloat(product.price),
@@ -274,9 +273,7 @@ app.post('/api/products', authenticateToken, upload.single('image'), async (req,
       } catch (error) {
         parsedFeatures = features.split(',').map(f => f.trim()).filter(f => f);
       }
-    }
-
-    // Parse specifications if it's a string
+    }    // Parse specifications if it's a string
     let parsedSpecs = {};
     if (specifications) {
       try {
@@ -286,17 +283,23 @@ app.post('/api/products', authenticateToken, upload.single('image'), async (req,
       }
     }
 
+    // Include brand in specifications
+    const finalSpecs = { 
+      features: parsedFeatures, 
+      brand: brand || '', 
+      ...parsedSpecs 
+    };
+
     const result = await query(
       `INSERT INTO products (shop_id, name, category, sport, price, description, specifications, inventory_count, image_url) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [req.shop.id, name, category, sport, price, description, { features: parsedFeatures, ...parsedSpecs }, quantity || 0, imageUrl]
-    );
-
-    const product = result.rows[0];
+      [req.shop.id, name, category, sport, price, description, finalSpecs, quantity || 0, imageUrl]
+    );    const product = result.rows[0];
     res.status(201).json({
       id: product.id,
       shopId: product.shop_id,
       name: product.name,
+      brand: product.specifications?.brand || '',
       category: product.category,
       sport: product.sport,
       price: parseFloat(product.price),
@@ -317,25 +320,40 @@ app.post('/api/products', authenticateToken, upload.single('image'), async (req,
 app.put('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, sport, price, description, specifications, quantity, image } = req.body;
+    const { name, brand, category, sport, price, description, specifications, quantity, image } = req.body;
+
+    // Parse and merge specifications with brand
+    let parsedSpecs = {};
+    if (specifications) {
+      try {
+        parsedSpecs = typeof specifications === 'string' ? JSON.parse(specifications) : specifications;
+      } catch (error) {
+        parsedSpecs = {};
+      }
+    }
+
+    // Include brand in specifications
+    const finalSpecs = { 
+      ...parsedSpecs,
+      brand: brand || ''
+    };
 
     const result = await query(
       `UPDATE products 
        SET name = $1, category = $2, sport = $3, price = $4, description = $5, 
            specifications = $6, inventory_count = $7, image_url = $8, updated_at = CURRENT_TIMESTAMP
        WHERE id = $9 AND shop_id = $10 RETURNING *`,
-      [name, category, sport, price, description, specifications || {}, quantity, image, id, req.shop.id]
+      [name, category, sport, price, description, finalSpecs, quantity, image, id, req.shop.id]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
-    }
-
-    const product = result.rows[0];
+    }    const product = result.rows[0];
     res.json({
       id: product.id,
       shopId: product.shop_id,
       name: product.name,
+      brand: product.specifications?.brand || '',
       category: product.category,
       sport: product.sport,
       price: parseFloat(product.price),
