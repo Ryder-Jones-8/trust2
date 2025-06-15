@@ -147,9 +147,19 @@ const SportIcon = styled.div<{ position: 'top' | 'bottom-left' | 'bottom-right' 
   }
 `
 
-const IconSvg = styled.svg`
-  width: clamp(45px, 6vw, 60px);
-  height: clamp(45px, 6vw, 60px);
+const IconSvg = styled.svg<{ sport?: string }>`
+  width: ${props => {
+    if (props.sport === 'surf' || props.sport === 'skate') {
+      return 'clamp(60px, 8vw, 80px)';
+    }
+    return 'clamp(45px, 6vw, 60px)';
+  }};
+  height: ${props => {
+    if (props.sport === 'surf' || props.sport === 'skate') {
+      return 'clamp(60px, 8vw, 80px)';
+    }
+    return 'clamp(45px, 6vw, 60px)';
+  }};
   fill: none;
   stroke: ${props => props.theme.colors.text};
   stroke-width: 1;
@@ -309,7 +319,8 @@ const HomePage = () => {
           position="top" 
           onClick={() => handleSportClick('surf')}
           title="surf"
-        ><IconSvg viewBox="0 0 24 24">
+        >
+          <IconSvg viewBox="0 0 24 24" sport="surf">
             {/* Main surfboard outline with pointed nose, wider middle, and fish tail */}
             <path d="M12 2 L10.5 4 L9.5 8 L9 12 L9.5 16 L10 18 L11 21 L12 20 L13 21 L14 18 L14.5 16 L15 12 L14.5 8 L13.5 4 Z"/>
             {/* Center stringer line */}
@@ -375,7 +386,9 @@ const HomePage = () => {
           {/* Skateboard Icon - Bottom Right */}        <SportIcon 
           position="bottom-right" 
           onClick={() => handleSportClick('skate')}
-          title="skate"        >          <IconSvg viewBox="0 0 24 24">
+          title="skate"
+        >
+          <IconSvg viewBox="0 0 24 24" sport="skate">
             {/* Penny board deck with upward-curved tail - side view */}
             <path d="M6 11 C6.5 10.5 7 11 7.5 11.5 L15 11.5 C16 11.5 17 11.7 17.5 12 C18 12.3 17.7 12.5 17 12.5 L7.5 12.5 C7 12.5 6.5 12 6 11 Z" strokeWidth="1.5" fill="none"/>
             
