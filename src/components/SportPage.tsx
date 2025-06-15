@@ -80,19 +80,40 @@ const CategoryName = styled.h3`
   letter-spacing: 0.05em;
 `
 
+const sportDisplayNames = {
+  surf: 'Surfing',
+  ski: 'Skiing/Snowboarding', 
+  skate: 'Skateboarding'
+}
+
+const categoryDisplayNames: { [key: string]: string } = {
+  'boards': 'Boards',
+  'wetsuits': 'Wetsuits', 
+  'fins': 'Fins',
+  'snowboards': 'Snowboards',
+  'skis': 'Skis',
+  'snowboard boots': 'Snowboard Boots',
+  'ski boots': 'Ski Boots',
+  'helmets': 'Helmets',
+  'goggles': 'Goggles',
+  'decks': 'Decks',
+  'trucks': 'Trucks',
+  'wheels': 'Wheels'
+}
+
 const sportCategories = {
   surf: [
-    { name: 'Boards', icon: '🏄‍♀️' },
-    { name: 'Wetsuits', icon: '🌊' },
-    { name: 'Fins', icon: '🔱' }
+    { name: 'boards', icon: '🏄‍♀️' },
+    { name: 'wetsuits', icon: '🌊' },
+    { name: 'fins', icon: '🔱' }
   ],
   ski: [
-    { name: 'Snowboards', icon: '🏂' },
-    { name: 'Skis', icon: '⛷️' },
-    { name: 'Snowboard Boots', icon: '🥾' },
-    { name: 'Ski Boots', icon: '👢' },
-    { name: 'Helmets', icon: '⛑️' },
-    { name: 'Goggles', icon: '🥽' }
+    { name: 'snowboards', icon: '🏂' },
+    { name: 'skis', icon: '⛷️' },
+    { name: 'snowboard boots', icon: '🥾' },
+    { name: 'ski boots', icon: '👢' },
+    { name: 'helmets', icon: '⛑️' },
+    { name: 'goggles', icon: '🥽' }
   ],
   snow: [
     { name: 'Snowboards', icon: '🏂' },
@@ -103,10 +124,10 @@ const sportCategories = {
     { name: 'Goggles', icon: '🥽' }
   ],
   skate: [
-    { name: 'Decks', icon: '🛹' },
-    { name: 'Trucks', icon: '🔧' },
-    { name: 'Wheels', icon: '⚙️' },
-    { name: 'Helmets', icon: '⛑️' }
+    { name: 'decks', icon: '🛹' },
+    { name: 'trucks', icon: '🔧' },
+    { name: 'wheels', icon: '⚙️' },
+    { name: 'helmets', icon: '⛑️' }
   ]
 }
 
@@ -130,7 +151,7 @@ const SportPage = () => {
         ← Back to Home
       </BackButton>
       
-      <SportTitle>{sport}</SportTitle>
+      <SportTitle>{sportDisplayNames[sport as keyof typeof sportDisplayNames]}</SportTitle>
       
       <CategoriesGrid>
         {categories.map((category) => (
@@ -139,7 +160,7 @@ const SportPage = () => {
             onClick={() => handleCategoryClick(category.name)}
           >
             <CategoryIcon>{category.icon}</CategoryIcon>
-            <CategoryName>{category.name}</CategoryName>
+            <CategoryName>{categoryDisplayNames[category.name] || category.name}</CategoryName>
           </CategoryCard>
         ))}
       </CategoriesGrid>

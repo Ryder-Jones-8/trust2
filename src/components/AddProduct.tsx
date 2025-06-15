@@ -241,9 +241,9 @@ const SuccessMessage = styled.div`
 `;
 
 const sportCategories = {
-  surf: ['Boards', 'Wetsuits', 'Fins'],
-  ski: ['Snowboards', 'Skis', 'Snowboard Boots', 'Ski Boots', 'Helmets', 'Goggles'],
-  skate: ['Decks', 'Trucks', 'Wheels', 'Helmets']
+  surf: ['boards', 'wetsuits', 'fins'],
+  ski: ['snowboards', 'skis', 'snowboard boots', 'ski boots', 'helmets', 'goggles'],
+  skate: ['decks', 'trucks', 'wheels', 'helmets']
 };
 
 const AddProduct: React.FC = () => {
@@ -593,7 +593,7 @@ const AddProduct: React.FC = () => {
               <SpecsTitle>Product Specifications</SpecsTitle>
               
               {/* Wetsuit Specifications */}
-              {formData.category === 'Wetsuits' && (
+              {formData.category === 'wetsuits' && (
                 <>                  <RangeGroup>
                     <div>
                       <RangeLabel>Height Range</RangeLabel>
@@ -688,7 +688,7 @@ const AddProduct: React.FC = () => {
               )}
 
               {/* Ski/Snowboard Specifications */}
-              {(formData.category === 'Snowboards' || formData.category === 'Skis') && (
+              {(formData.category === 'snowboards' || formData.category === 'skis') && (
                 <>                  <RangeGroup>
                     <div>
                       <RangeLabel>Length Range</RangeLabel>
@@ -760,7 +760,7 @@ const AddProduct: React.FC = () => {
               )}
 
               {/* Skateboard Specifications */}
-              {formData.category === 'Decks' && (
+              {formData.category === 'decks' && (
                 <>
                   <RangeGroup>
                     <div>
@@ -802,7 +802,7 @@ const AddProduct: React.FC = () => {
               )}
 
               {/* Wheel Specifications */}
-              {formData.category === 'Wheels' && (
+              {formData.category === 'wheels' && (
                 <>                  <RangeGroup>
                     <div>
                       <RangeLabel>Wheel Diameter Range</RangeLabel>
@@ -848,7 +848,7 @@ const AddProduct: React.FC = () => {
               )}
 
               {/* Helmet Specifications */}
-              {formData.category === 'Helmets' && (                <RangeGroup>
+              {formData.category === 'helmets' && (                <RangeGroup>
                   <div>
                     <RangeLabel>Head Circumference Range</RangeLabel>
                     <SmallInput
@@ -872,7 +872,7 @@ const AddProduct: React.FC = () => {
               )}
 
               {/* Boot Specifications */}
-              {(formData.category === 'Snowboard Boots' || formData.category === 'Ski Boots') && (
+              {(formData.category === 'snowboard boots' || formData.category === 'ski boots') && (
                 <div>
                   <Label>Available Sizes</Label>
                   <CheckboxGroup>

@@ -317,8 +317,8 @@ const HomePage = () => {
           </IconSvg>
         </SportIcon>        {/* Snowflake Icon - Bottom Left */}        <SportIcon 
           position="bottom-left" 
-          onClick={() => handleSportClick('snow')}
-          title="snow"
+          onClick={() => handleSportClick('ski')}
+          title="skiing/snowboarding"
         >
           <IconSvg viewBox="0 0 24 24">
             {/* Main cross lines */}
