@@ -314,15 +314,15 @@ const EditProduct: React.FC = () => {
   const loadProduct = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/products', {
+      const response = await fetch(`http://localhost:3001/api/products/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
-        const products = await response.json();
-        const product = products.find((p: Product) => p.id === id);        if (product) {
+        const product: Product = await response.json();
+        if (product) {
           setFormData({
             name: product.name,
             sport: product.sport,
