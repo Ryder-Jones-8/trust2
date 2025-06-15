@@ -501,7 +501,7 @@ app.post('/api/recommendations', async (req, res) => {
     } catch (sessionError) {
       console.error('Error storing customer session:', sessionError);
       // Continue without storing session if it fails
-    }    // Get products for recommendations
+    }    // Get ALL products for recommendations (we'll score them instead of filtering strictly)
     let recommendationQuery = 'SELECT * FROM products WHERE sport = $1';
     const params = [sport];
 
@@ -513,55 +513,242 @@ app.post('/api/recommendations', async (req, res) => {
     if (shopId) {
       recommendationQuery += ` AND shop_id = $${params.length + 1}`;
       params.push(shopId);
-    }    // Parse price range from formData
-    const priceRange = formData.priceRange;
-    const { min: minPrice, max: maxPrice } = parsePriceRange(priceRange);
-    
-    // Only apply price filtering if a specific range is selected
-    if (priceRange && priceRange !== 'No preference') {
-      console.log('Applying price filter:', { priceRange, minPrice, maxPrice });
-      if (maxPrice === Infinity) {
-        recommendationQuery += ` AND price >= $${params.length + 1}`;
-        params.push(minPrice);
-      } else {
-        recommendationQuery += ` AND price BETWEEN $${params.length + 1} AND $${params.length + 2}`;
-        params.push(minPrice, maxPrice);
-      }
     }
 
-    recommendationQuery += ' AND inventory_count > 0 ORDER BY RANDOM() LIMIT 10';
+    // Only filter out items with no inventory
+    recommendationQuery += ' AND inventory_count > 0 ORDER BY RANDOM() LIMIT 50'; // Get more products to score
 
-    console.log('Executing query:', recommendationQuery, 'with params:', params);
-    const recommendationsResult = await query(recommendationQuery, params);    console.log('Query returned', recommendationsResult.rows.length, 'products');
-      const recommendations = recommendationsResult.rows.map(product => {
+    // Parse price range for scoring (not filtering)
+    const priceRange = formData.priceRange;
+    const { min: minPrice, max: maxPrice } = parsePriceRange(priceRange);    console.log('Executing query:', recommendationQuery, 'with params:', params);
+    const recommendationsResult = await query(recommendationQuery, params);    
+    console.log('Query returned', recommendationsResult.rows.length, 'products');
+    
+    // Score and categorize all products
+    const scoredProducts = recommendationsResult.rows.map(product => {
       const productPrice = parseFloat(product.price);
       const matchReasons = [];
-      let baseScore = Math.floor(Math.random() * 20) + 70; // Base score 70-90%
-      
-      // Add generic match reasons based on form data
-      if (formData.experienceLevel) {
-        matchReasons.push('Good match for experience level');
-      }
-      
-      // Add price range match reason ONLY if price filtering was applied AND product is actually in range
-      if (priceRange && priceRange !== 'No preference') {
-        const { min: minPrice, max: maxPrice } = parsePriceRange(priceRange);
-        if (productPrice >= minPrice && (maxPrice === Infinity || productPrice <= maxPrice)) {
-          matchReasons.push('Fits your price range');
-          baseScore += 5; // Boost score for price match
+      let baseScore = 60; // Start lower for more realistic scoring
+        // Experience level matching
+      if (formData.experience || formData.experienceLevel) {
+        const experience = formData.experience || formData.experienceLevel;
+        const expLower = experience.toLowerCase();
+        const productDesc = (product.description || '').toLowerCase();
+        
+        // Check specifications structure for experience level
+        const specExpLevels = product.specifications?.experienceLevel || [];
+        const hasSpecificExpLevel = specExpLevels.some(level => 
+          level.toLowerCase() === expLower
+        );
+        
+        if (hasSpecificExpLevel) {
+          matchReasons.push(`Perfect match for ${experience} level`);
+          baseScore += 25;
+        } else {
+          // Check for near matches in specifications
+          const expMatchScore = {
+            beginner: { intermediate: 15, advanced: 5 },
+            intermediate: { beginner: 12, advanced: 18 },
+            advanced: { intermediate: 12, beginner: 8, expert: 5 },
+            expert: { advanced: 15, intermediate: 8 }
+          };
+          
+          let foundNearMatch = false;
+          for (const specLevel of specExpLevels) {
+            const specLower = specLevel.toLowerCase();
+            if (expMatchScore[expLower] && expMatchScore[expLower][specLower]) {
+              const scoreBoost = expMatchScore[expLower][specLower];
+              baseScore += scoreBoost;
+              foundNearMatch = true;
+              
+              if (expLower === 'beginner' && specLower === 'intermediate') {
+                matchReasons.push('Designed for intermediate but beginner-friendly');
+              } else if (expLower === 'intermediate' && specLower === 'beginner') {
+                matchReasons.push('Beginner-focused but you\'re ready for this');
+              } else if (expLower === 'intermediate' && specLower === 'advanced') {
+                matchReasons.push('Advanced features to grow into');
+              } else if (expLower === 'advanced' && specLower === 'intermediate') {
+                matchReasons.push('Reliable choice, less aggressive than some advanced options');
+              }
+              break;
+            }
+          }
+          
+          if (!foundNearMatch) {
+            // Fallback to description check
+            if (productDesc.includes(expLower)) {
+              matchReasons.push(`Good match for ${experience} level`);
+              baseScore += 15;
+            } else {
+              matchReasons.push('Experience level match to be verified');
+              baseScore += 5;
+            }
+          }
         }
       }
       
-      // Add other relevant match reasons based on form data
-      if (formData.skillLevel || formData.ridingStyle || formData.boardType || formData.terrainPreference) {
-        matchReasons.push('Matches your preferences');
+      // Price range matching with detailed explanations
+      if (priceRange && priceRange !== 'No preference') {
+        const isInRange = productPrice >= minPrice && (maxPrice === Infinity || productPrice <= maxPrice);
+        
+        if (isInRange) {
+          matchReasons.push('Fits perfectly in your price range');
+          baseScore += 15;
+        } else {
+          // Explain how far outside the range and why it might still be worth considering
+          const priceDiff = productPrice < minPrice ? minPrice - productPrice : productPrice - maxPrice;
+          const percentDiff = Math.round((priceDiff / (maxPrice === Infinity ? minPrice : (minPrice + maxPrice) / 2)) * 100);
+          
+          if (productPrice < minPrice) {
+            if (percentDiff <= 30) {
+              matchReasons.push(`Slightly under your budget ($${priceDiff.toFixed(0)} less) - great value`);
+              baseScore += 8;
+            } else {
+              matchReasons.push(`Well under budget - may lack some premium features`);
+              baseScore += 5;
+            }
+          } else if (maxPrice !== Infinity) {
+            if (percentDiff <= 20) {
+              matchReasons.push(`Slightly over budget ($${priceDiff.toFixed(0)} more) but has premium features`);
+              baseScore += 5;
+            } else if (percentDiff <= 40) {
+              matchReasons.push(`${percentDiff}% over budget but offers significant upgrades`);
+              baseScore += 2;
+            } else {
+              matchReasons.push(`Significantly over budget but top-tier quality`);
+              baseScore -= 5;
+            }
+          }
+        }
+      }
+        // Style/type matching using specifications
+      const userStyles = [formData.ridingStyle, formData.surfStyle, formData.skateStyle, formData.boardType, formData.terrainPreference]
+        .filter(Boolean);
+      
+      if (userStyles.length > 0) {
+        const productDesc = (product.description || '').toLowerCase();
+        const specRidingStyles = product.specifications?.ridingStyleOptions || [];
+        
+        let perfectStyleMatch = false;
+        let nearStyleMatch = false;
+        
+        for (const userStyle of userStyles) {
+          const userStyleLower = userStyle.toLowerCase();
+          
+          // Check for exact match in specifications
+          const hasExactMatch = specRidingStyles.some(style => 
+            style.toLowerCase() === userStyleLower || 
+            style.toLowerCase().includes(userStyleLower) ||
+            userStyleLower.includes(style.toLowerCase())
+          );
+          
+          if (hasExactMatch) {
+            matchReasons.push(`Perfect match for ${userStyle} style`);
+            baseScore += 20;
+            perfectStyleMatch = true;
+            break;
+          }
+          
+          // Check for description match
+          if (productDesc.includes(userStyleLower)) {
+            matchReasons.push(`Great for ${userStyle} riding`);
+            baseScore += 15;
+            perfectStyleMatch = true;
+            break;
+          }
+        }
+        
+        if (!perfectStyleMatch) {
+          // Check for versatile/all-mountain options as good alternatives
+          const isVersatile = specRidingStyles.some(style => 
+            style.toLowerCase().includes('all') || 
+            style.toLowerCase().includes('versatile') || 
+            style.toLowerCase().includes('general')
+          ) || productDesc.includes('all-mountain') || productDesc.includes('versatile');
+          
+          if (isVersatile) {
+            matchReasons.push('Versatile design works for multiple riding styles');
+            baseScore += 12;
+            nearStyleMatch = true;
+          } else if (specRidingStyles.length > 0) {
+            matchReasons.push(`Different style (${specRidingStyles[0]}) but could expand your versatility`);
+            baseScore += 5;
+          }
+        }
+        
+        if (!perfectStyleMatch && !nearStyleMatch && specRidingStyles.length === 0) {
+          matchReasons.push('Style preferences to be verified');
+          baseScore += 3;
+        }
+      }
+        // Size and physical compatibility matching
+      if (formData.height || formData.weight || formData.footLength) {
+        let sizeMatches = 0;
+        let totalSizeChecks = 0;
+        
+        // Height matching for boards
+        if (formData.height && product.specifications?.lengthRange) {
+          totalSizeChecks++;
+          const heightInInches = parseFloat(formData.height.replace(/[^\d.]/g, ''));
+          const lengthRange = product.specifications.lengthRange;
+          if (heightInInches >= lengthRange.min && heightInInches <= lengthRange.max) {
+            sizeMatches++;
+            matchReasons.push('Perfect length for your height');
+            baseScore += 15;
+          } else {
+            const diff = heightInInches < lengthRange.min ? 
+              lengthRange.min - heightInInches : heightInInches - lengthRange.max;
+            if (diff <= 2) {
+              matchReasons.push('Length slightly off but still workable');
+              baseScore += 8;
+            } else {
+              matchReasons.push('Length not optimal for your height');
+              baseScore += 2;
+            }
+          }
+        }
+        
+        // Weight matching
+        if (formData.weight && product.specifications?.weightCapacityRange) {
+          totalSizeChecks++;
+          const weightInLbs = parseFloat(formData.weight.replace(/[^\d.]/g, ''));
+          const weightRange = product.specifications.weightCapacityRange;
+          if (weightInLbs >= weightRange.min && weightInLbs <= weightRange.max) {
+            sizeMatches++;
+            matchReasons.push('Perfect weight capacity match');
+            baseScore += 15;
+          } else {
+            if (weightInLbs < weightRange.min) {
+              matchReasons.push('Designed for heavier riders but will work');
+              baseScore += 8;
+            } else {
+              matchReasons.push('May be on the edge of weight capacity');
+              baseScore += 5;
+            }
+          }
+        }
+        
+        // If no specific size data available
+        if (totalSizeChecks === 0) {
+          matchReasons.push('Size compatibility to be verified in store');
+          baseScore += 3;
+        }
       }
       
-      // Add popular choice as fallback or supplement
+      // Brand reputation / quality indicators
+      const premiumBrands = ['burton', 'rossignol', 'k2', 'salomon', 'atomic', 'völkl'];
+      const brand = (product.brand || '').toLowerCase();
+      if (premiumBrands.includes(brand)) {
+        matchReasons.push('Trusted premium brand');
+        baseScore += 5;
+      }
+      
+      // Add popular choice as fallback
       if (matchReasons.length === 0) {
-        matchReasons.push('Popular choice');
-      } else if (Math.random() > 0.5) {
-        matchReasons.push('Popular choice');
+        matchReasons.push('Popular choice in this category');
+        baseScore += 5;
+      } else if (baseScore >= 80) {
+        matchReasons.push('Highly recommended');
       }
       
       return {
@@ -575,11 +762,17 @@ app.post('/api/recommendations', async (req, res) => {
         image: product.image_url,
         inStock: product.inventory_count > 0,
         quantity: product.inventory_count,
-        score: Math.min(baseScore, 100), // Cap score at 100%
+        score: Math.min(Math.max(baseScore, 45), 100), // Keep scores between 45-100%
         matchReasons,
-        features: Array.isArray(product.specifications?.features) ? product.specifications.features : []
+        features: Array.isArray(product.specifications?.features) ? product.specifications.features : [],
+        brand: product.brand
       };
     });
+
+    // Sort by score and return top matches (including imperfect ones)
+    const recommendations = scoredProducts
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 15); // Return more results to include near-matches
 
     // Update session with recommendations if session was stored
     try {

@@ -130,8 +130,12 @@ const ProductPrice = styled.p`
   margin-bottom: 1rem;
 `
 
-const MatchScore = styled.div`
-  background-color: ${props => props.theme.colors.text};
+const MatchScore = styled.div<{ scoreValue: number }>`
+  background-color: ${props => 
+    props.scoreValue >= 85 ? '#4ade80' : // green for high scores
+    props.scoreValue >= 70 ? '#facc15' : // yellow for medium scores  
+    '#f87171' // red for lower scores
+  };
   color: ${props => props.theme.colors.primary};
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -139,6 +143,40 @@ const MatchScore = styled.div`
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+`
+
+const MatchReasons = styled.div`
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid ${props => props.theme.colors.text};
+`
+
+const MatchReasonsTitle = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.text};
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`
+
+const MatchReason = styled.div`
+  font-size: 0.85rem;
+  color: ${props => props.theme.colors.textSecondary};
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+  
+  &:before {
+    content: "✓ ";
+    color: ${props => props.theme.colors.text};
+    font-weight: bold;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
 `
 
 const ProductFeatures = styled.ul`
@@ -156,6 +194,15 @@ const ProductFeatures = styled.ul`
       color: ${props => props.theme.colors.text};
     }
   }
+`
+
+const FeaturesTitle = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.textSecondary};
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `
 
 const NewSearchButton = styled.button`
@@ -364,18 +411,32 @@ const RecommendationPage = () => {
                   getSportIcon(product.sport, product.category)
                 )}
               </ProductImage>
-              <MatchScore>{product.score}% Match</MatchScore>
+              <MatchScore 
+                scoreValue={product.score}
+              >
+                {product.score}% Match
+              </MatchScore>
               <ProductName>{product.name}</ProductName>
               <ProductBrand>{product.brand}</ProductBrand>
               <ProductPrice>{formatCurrency(product.price)}</ProductPrice>
-              <ProductFeatures>
-                {product.matchReasons?.map((reason: string, idx: number) => (
-                  <li key={idx}>{reason}</li>
-                ))}
-                {product.features.slice(0, 3).map((feature: string, idx: number) => (
-                  <li key={`feature-${idx}`}>{feature}</li>
-                ))}
-              </ProductFeatures>
+              
+              {product.matchReasons && product.matchReasons.length > 0 && (
+                <MatchReasons>
+                  <MatchReasonsTitle>Why this matches:</MatchReasonsTitle>
+                  {product.matchReasons.map((reason: string, idx: number) => (
+                    <MatchReason key={idx}>{reason}</MatchReason>
+                  ))}
+                </MatchReasons>
+              )}
+              
+              {product.features && product.features.length > 0 && (
+                <ProductFeatures>
+                  <FeaturesTitle>Key features:</FeaturesTitle>
+                  {product.features.slice(0, 3).map((feature: string, idx: number) => (
+                    <li key={`feature-${idx}`}>{feature}</li>
+                  ))}
+                </ProductFeatures>
+              )}
             </ProductCard>
           ))}
         </RecommendationsGrid>
@@ -383,8 +444,8 @@ const RecommendationPage = () => {
 
       {!loading && !error && recommendations.length === 0 && (
         <EmptyState>
-          <h3>No products found</h3>
-          <p>Sorry, we couldn't find any products matching your criteria. Try adjusting your preferences or check back later!</p>
+          <h3>No products available</h3>
+          <p>There are currently no products in stock for this category. Our system shows both perfect matches and close alternatives, so please check back later or try a different category!</p>
         </EmptyState>
       )}
 
