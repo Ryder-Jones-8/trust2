@@ -244,6 +244,86 @@ const ErrorMessage = styled.div`
   max-width: 500px;
 `
 
+const EducationalSection = styled.div`
+  background-color: ${props => props.theme.colors.secondary};
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 0 auto 3rem auto;
+  max-width: 1200px;
+  border: 1px solid ${props => props.theme.colors.accent};
+`
+
+const EducationalTitle = styled.h2`
+  color: ${props => props.theme.colors.text};
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+`
+
+const GuideGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+`
+
+const GuideCard = styled.div`
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border-left: 4px solid ${props => props.theme.colors.text};
+`
+
+const GuideCardTitle = styled.h3`
+  color: ${props => props.theme.colors.text};
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`
+
+const GuideCardContent = styled.div`
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 0.9rem;
+  line-height: 1.5;
+  
+  ul {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+  }
+  
+  li {
+    margin-bottom: 0.25rem;
+  }
+  
+  strong {
+    color: ${props => props.theme.colors.text};
+  }
+`
+
+const TipsBanner = styled.div`
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+`
+
+const TipsText = styled.p`
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 0.9rem;
+  margin: 0;
+  
+  strong {
+    color: ${props => props.theme.colors.text};
+  }
+`
+
 // Helper function to get sport icon
 const getSportIcon = (sport: string, category: string): string => {
   const icons: { [key: string]: { [key: string]: string } } = {
@@ -275,6 +355,17 @@ interface LocationState {
   sport: string;
   category: string;
   formData: CustomFormData;
+}
+
+interface GuideContent {
+  title: string;
+  content: React.ReactElement;
+}
+
+interface EducationalContentData {
+  title: string;
+  guides: GuideContent[];
+  tip: string;
 }
 
 const RecommendationPage = () => {
@@ -449,6 +540,31 @@ const RecommendationPage = () => {
         </EmptyState>
       )}
 
+      {getEducationalContent(sport, category, formData) && (
+        <EducationalSection>
+          <EducationalTitle>{getEducationalContent(sport, category, formData)?.title}</EducationalTitle>
+
+          <GuideGrid>
+            {getEducationalContent(sport, category, formData)?.guides.map((guide: GuideContent, idx: number) => (
+              <GuideCard key={idx}>
+                <GuideCardTitle>
+                  {guide.title}
+                </GuideCardTitle>
+                <GuideCardContent>
+                  {guide.content}
+                </GuideCardContent>
+              </GuideCard>
+            ))}
+          </GuideGrid>
+
+          <TipsBanner>
+            <TipsText>
+              <strong>{getEducationalContent(sport, category, formData)?.tip}</strong>
+            </TipsText>
+          </TipsBanner>
+        </EducationalSection>
+      )}
+
       <NewSearchButton onClick={handleNewSearch}>
         Start New Search
       </NewSearchButton>
@@ -466,6 +582,207 @@ const EmptyState = styled.div`
     margin-bottom: 1rem;
   }
 `
+
+const getEducationalContent = (sport: string, category: string, formData: CustomFormData): EducationalContentData | null => {
+  const content = {
+    ski: {
+      snowboards: {
+        title: "🎿 What to Look for in a Snowboard",
+        guides: [
+          {
+            title: "📏 Board Length",
+            content: (
+              <div>
+                <p><strong>Your ideal length:</strong> Based on your height ({formData.height}), weight ({formData.weight}), and {String(formData.experience)?.toLowerCase()} experience level.</p>
+                <ul>
+                  <li><strong>Shorter boards (chin to nose height):</strong> Easier to turn, better for beginners and freestyle</li>
+                  <li><strong>Longer boards (nose to forehead height):</strong> More stable at speed, better float in powder</li>
+                  <li><strong>Your style ({formData.ridingStyle}):</strong> Influences the optimal length within your range</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "💪 Board Flex",
+            content: (
+              <div>
+                <p><strong>Flex affects how the board feels and performs:</strong></p>
+                <ul>
+                  <li><strong>Soft flex (1-4):</strong> Forgiving, great for beginners and park riding</li>
+                  <li><strong>Medium flex (5-7):</strong> Versatile, works for most riding styles</li>
+                  <li><strong>Stiff flex (8-10):</strong> Responsive, better for advanced riders and high speeds</li>
+                </ul>
+                <p>For {String(formData.experience)?.toLowerCase()} riders like you, consider medium to {formData.experience === 'Beginner' ? 'soft' : formData.experience === 'Advanced' || formData.experience === 'Expert' ? 'stiff' : 'medium'} flex.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎯 Board Shape",
+            content: (
+              <div>
+                <p><strong>Different shapes for different styles:</strong></p>
+                <ul>
+                  <li><strong>Directional:</strong> Longer nose, great for all-mountain and freeride</li>
+                  <li><strong>Twin:</strong> Symmetrical, perfect for freestyle and park</li>
+                  <li><strong>Directional Twin:</strong> Slight directional bias, versatile for most riding</li>
+                </ul>
+                <p>Your {formData.ridingStyle} preference suggests a {formData.ridingStyle === 'Freestyle' ? 'twin' : formData.ridingStyle === 'Freeride' ? 'directional' : 'directional twin'} shape would work well.</p>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: A board that's slightly shorter than recommended is easier to learn on, while a longer board provides more stability at higher speeds."
+      },
+      skis: {
+        title: "⛷️ What to Look for in Skis",
+        guides: [
+          {
+            title: "📏 Ski Length",
+            content: (
+              <div>
+                <p><strong>Your ideal length:</strong> Based on your height ({formData.height}), weight ({formData.weight}), and skiing ability.</p>
+                <ul>
+                  <li><strong>Shorter skis (chin to nose):</strong> Easier to turn, more maneuverable</li>
+                  <li><strong>Longer skis (forehead to top of head):</strong> More stable, better for speed and powder</li>
+                  <li><strong>All-mountain skis:</strong> Typically nose to forehead height</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "📐 Ski Width (Waist)",
+            content: (
+              <div>
+                <p><strong>Waist width affects performance:</strong></p>
+                <ul>
+                  <li><strong>Narrow (70-85mm):</strong> Quick edge-to-edge, great for groomed runs</li>
+                  <li><strong>Medium (85-105mm):</strong> Versatile all-mountain performance</li>
+                  <li><strong>Wide (105mm+):</strong> Better float in powder, slower on groomers</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "🎯 Ski Type",
+            content: (
+              <div>
+                <p><strong>Choose based on where you ski:</strong></p>
+                <ul>
+                  <li><strong>All-Mountain:</strong> Versatile for any terrain</li>
+                  <li><strong>Carving:</strong> Precise turns on groomed runs</li>
+                  <li><strong>Powder:</strong> Wide skis for deep snow</li>
+                  <li><strong>Racing:</strong> Stiff and precise for high speeds</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Beginners should prioritize ease of turning over stability - choose skis on the shorter end of your range."
+      }
+    },
+    surf: {
+      boards: {
+        title: "🏄‍♀️ What to Look for in a Surfboard",
+        guides: [
+          {
+            title: "📏 Board Length & Volume",
+            content: (
+              <div>
+                <p><strong>Your size matters:</strong> Height ({formData.height}), weight ({formData.weight}), and experience level determine ideal dimensions.</p>
+                <ul>
+                  <li><strong>Beginners:</strong> Longer, wider boards with more volume for stability</li>
+                  <li><strong>Intermediate:</strong> Moderate length, balanced volume for progression</li>
+                  <li><strong>Advanced:</strong> Shorter, lower volume boards for performance</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "🌊 Board Type",
+            content: (
+              <div>
+                <p><strong>Different boards for different waves:</strong></p>
+                <ul>
+                  <li><strong>Longboard (8-10ft):</strong> Stable, great for small waves and beginners</li>
+                  <li><strong>Funboard (7-8.5ft):</strong> Good progression board, versatile</li>
+                  <li><strong>Shortboard (5.5-7ft):</strong> High performance, requires experience</li>
+                </ul>
+                <p>For {formData.waveConditions}, a {String(formData.waveConditions)?.includes('Small') ? 'longboard or funboard' : String(formData.waveConditions)?.includes('Large') ? 'shortboard or gun' : 'versatile all-around board'} would be ideal.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎯 Tail Shape",
+            content: (
+              <div>
+                <p><strong>Tail affects performance:</strong></p>
+                <ul>
+                  <li><strong>Square tail:</strong> Maximum planing surface, good for small waves</li>
+                  <li><strong>Round tail:</strong> Smooth turns, forgiving</li>
+                  <li><strong>Pin tail:</strong> Hold in larger waves, less maneuverable</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: When in doubt, choose a board with more volume rather than less - it's easier to surf a board that's slightly too big than too small."
+      }
+    },
+    skate: {
+      decks: {
+        title: "🛹 What to Look for in a Skateboard Deck",
+        guides: [
+          {
+            title: "📏 Deck Width",
+            content: (
+              <div>
+                <p><strong>Width affects control and comfort:</strong></p>
+                <ul>
+                  <li><strong>7.5" - 8.0":</strong> Street skating, technical tricks</li>
+                  <li><strong>8.0" - 8.5":</strong> Versatile, good for most skating</li>
+                  <li><strong>8.5" +:</strong> Vert, pools, larger riders</li>
+                </ul>
+                <p>Your shoe size and skating style determine the best width for you.</p>
+              </div>
+            )
+          },
+          {
+            title: "🎯 Deck Shape",
+            content: (
+              <div>
+                <p><strong>Shape affects performance:</strong></p>
+                <ul>
+                  <li><strong>Popsicle:</strong> Standard street shape, symmetrical</li>
+                  <li><strong>Cruiser:</strong> Wider, more stable for transportation</li>
+                  <li><strong>Old School:</strong> Wider nose, retro style</li>
+                </ul>
+              </div>
+            )
+          },
+          {
+            title: "🪵 Construction",
+            content: (
+              <div>
+                <p><strong>Materials and build quality:</strong></p>
+                <ul>
+                  <li><strong>7-ply maple:</strong> Standard, durable construction</li>
+                  <li><strong>Bamboo/composite:</strong> Lighter, more flex</li>
+                  <li><strong>Carbon fiber:</strong> Ultra-light, premium option</li>
+                </ul>
+              </div>
+            )
+          }
+        ],
+        tip: "💡 Pro Tip: Start with a standard 8.0\" popsicle deck if you're unsure - it's the most versatile size for learning."
+      }
+    }
+  };
+
+  const sportContent = content[sport as keyof typeof content];
+  if (!sportContent) return null;
+  
+  return sportContent[category as keyof typeof sportContent] as EducationalContentData || null;
+};
 
 export default RecommendationPage
 

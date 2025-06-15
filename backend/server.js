@@ -680,16 +680,107 @@ app.post('/api/recommendations', async (req, res) => {
           matchReasons.push('Style preferences to be verified');
           baseScore += 3;
         }
-      }
-        // Size and physical compatibility matching
+      }        // Enhanced size and physical compatibility matching
       if (formData.height || formData.weight || formData.footLength) {
         let sizeMatches = 0;
         let totalSizeChecks = 0;
         
-        // Height matching for boards
-        if (formData.height && product.specifications?.lengthRange) {
+        const heightInches = parseHeight(formData.height);
+        const weightLbs = parseWeight(formData.weight);
+        
+        // Snowboard length matching based on rider characteristics
+        if (product.category === 'snowboards' && heightInches && product.specifications?.lengthRange) {
           totalSizeChecks++;
-          const heightInInches = parseFloat(formData.height.replace(/[^\d.]/g, ''));
+          const recommendedLength = calculateSnowboardLength(
+            heightInches,
+            weightLbs,
+            formData.ridingStyle,
+            formData.experience
+          );
+          
+          if (recommendedLength) {
+            // Check if any board size in the range is suitable
+            const minLength = product.specifications.lengthRange.min;
+            const maxLength = product.specifications.lengthRange.max;
+            
+            // Check if recommended length falls within the product's available range
+            if (recommendedLength >= minLength - 3 && recommendedLength <= maxLength + 3) {
+              sizeMatches++;
+              const reason = generateSizeMatchReason(
+                (minLength + maxLength) / 2, // Average of available range
+                recommendedLength,
+                'snowboard'
+              );
+              if (reason) {
+                matchReasons.push(reason);
+                // Give higher scores for perfect matches
+                if (Math.abs(((minLength + maxLength) / 2) - recommendedLength) <= 2) {
+                  baseScore += 25;
+                } else if (Math.abs(((minLength + maxLength) / 2) - recommendedLength) <= 5) {
+                  baseScore += 18;
+                } else {
+                  baseScore += 12;
+                }
+              }
+            } else {
+              const avgBoardLength = (minLength + maxLength) / 2;
+              const diff = Math.abs(avgBoardLength - recommendedLength);
+              if (diff <= 8) {
+                matchReasons.push(`Snowboard length workable but not optimal for your height`);
+                baseScore += 5;
+              } else {
+                matchReasons.push(`Snowboard length may not be ideal for your measurements`);
+                baseScore += 2;
+              }
+            }
+          }
+        }
+        
+        // Surfboard length matching based on rider characteristics
+        else if (product.category === 'boards' && product.sport === 'surf' && heightInches && weightLbs && product.specifications?.lengthRange) {
+          totalSizeChecks++;
+          const recommendedLength = calculateSurfboardLength(
+            heightInches,
+            weightLbs,
+            formData.experience,
+            formData.surfStyle
+          );
+          
+          if (recommendedLength) {
+            // Convert inches to cm for comparison (assuming lengthRange is in cm)
+            const recommendedLengthCm = recommendedLength * 2.54;
+            const minLength = product.specifications.lengthRange.min;
+            const maxLength = product.specifications.lengthRange.max;
+            
+            if (recommendedLengthCm >= minLength - 8 && recommendedLengthCm <= maxLength + 8) {
+              sizeMatches++;
+              const reason = generateSizeMatchReason(
+                (minLength + maxLength) / 2,
+                recommendedLengthCm,
+                'surfboard'
+              );
+              if (reason) {
+                matchReasons.push(reason);
+                // Give higher scores for perfect matches
+                if (Math.abs(((minLength + maxLength) / 2) - recommendedLengthCm) <= 5) {
+                  baseScore += 25;
+                } else if (Math.abs(((minLength + maxLength) / 2) - recommendedLengthCm) <= 10) {
+                  baseScore += 18;
+                } else {
+                  baseScore += 12;
+                }
+              }
+            } else {
+              matchReasons.push(`Surfboard length may not be optimal for your height and style`);
+              baseScore += 5;
+            }
+          }
+        }
+        
+        // Generic height matching for other board types
+        else if (formData.height && product.specifications?.lengthRange) {
+          totalSizeChecks++;
+          const heightInInches = heightInches || parseFloat(formData.height.replace(/[^\d.]/g, ''));
           const lengthRange = product.specifications.lengthRange;
           if (heightInInches >= lengthRange.min && heightInInches <= lengthRange.max) {
             sizeMatches++;
@@ -711,7 +802,7 @@ app.post('/api/recommendations', async (req, res) => {
         // Weight matching
         if (formData.weight && product.specifications?.weightCapacityRange) {
           totalSizeChecks++;
-          const weightInLbs = parseFloat(formData.weight.replace(/[^\d.]/g, ''));
+          const weightInLbs = weightLbs || parseFloat(formData.weight.replace(/[^\d.]/g, ''));
           const weightRange = product.specifications.weightCapacityRange;
           if (weightInLbs >= weightRange.min && weightInLbs <= weightRange.max) {
             sizeMatches++;
@@ -963,3 +1054,133 @@ process.on('SIGINT', async () => {
   await pool.end();
   process.exit(0);
 });
+
+// Helper functions for parsing height and calculating board sizes
+function parseHeight(heightStr) {
+  if (!heightStr) return null;
+  
+  // Handle feet'inches" format like "5'10""
+  const feetInchesMatch = heightStr.match(/(\d+)'(\d+)"/);
+  if (feetInchesMatch) {
+    const feet = parseFloat(feetInchesMatch[1]);
+    const inches = parseFloat(feetInchesMatch[2]);
+    return (feet * 12) + inches; // Convert to total inches
+  }
+  
+  // Handle decimal feet format like "5.83"
+  const decimalMatch = heightStr.match(/[\d.]+/);
+  if (decimalMatch) {
+    const feet = parseFloat(decimalMatch[0]);
+    return feet * 12; // Convert to inches
+  }
+  
+  return null;
+}
+
+function parseWeight(weightStr) {
+  if (!weightStr) return null;
+  const match = weightStr.match(/[\d.]+/);
+  return match ? parseFloat(match[0]) : null;
+}
+
+// Calculate recommended snowboard length based on height and riding style
+function calculateSnowboardLength(heightInches, weight, ridingStyle, experience) {
+  if (!heightInches) return null;
+  
+  // Base calculation: height in cm minus offset based on style
+  const heightCm = heightInches * 2.54;
+  let offset = 20; // Default offset for all-mountain
+  
+  // Adjust offset based on riding style
+  const style = (ridingStyle || '').toLowerCase();
+  if (style.includes('freestyle') || style.includes('park')) {
+    offset = 25; // Shorter for freestyle/park
+  } else if (style.includes('freeride') || style.includes('powder')) {
+    offset = 15; // Longer for freeride/powder
+  } else if (style.includes('carving') || style.includes('racing')) {
+    offset = 10; // Longer for carving/racing
+  }
+  
+  // Adjust for experience level
+  const exp = (experience || '').toLowerCase();
+  if (exp === 'beginner') {
+    offset += 5; // Beginners benefit from shorter boards
+  } else if (exp === 'advanced' || exp === 'expert') {
+    offset -= 5; // Advanced riders can handle longer boards
+  }
+  
+  // Weight adjustment
+  if (weight) {
+    if (weight > 180) offset -= 2; // Heavier riders need longer boards
+    if (weight < 140) offset += 2; // Lighter riders need shorter boards
+  }
+  
+  const recommendedLengthCm = heightCm - offset;
+  return Math.round(recommendedLengthCm);
+}
+
+// Calculate recommended surfboard length based on height, weight, and experience
+function calculateSurfboardLength(heightInches, weight, experience, surfStyle) {
+  if (!heightInches || !weight) return null;
+  
+  // Base calculation starts with height
+  let lengthInches = heightInches;
+  
+  // Adjust based on experience level
+  const exp = (experience || '').toLowerCase();
+  if (exp === 'beginner') {
+    lengthInches += 8; // Beginners need longer, more stable boards
+  } else if (exp === 'intermediate') {
+    lengthInches += 4;
+  } else if (exp === 'advanced' || exp === 'expert') {
+    lengthInches += 0; // Advanced riders can go shorter
+  }
+  
+  // Adjust based on surf style
+  const style = (surfStyle || '').toLowerCase();
+  if (style.includes('longboard')) {
+    lengthInches += 12; // Longboards are significantly longer
+  } else if (style.includes('shortboard')) {
+    lengthInches -= 4; // Shortboards are shorter and more maneuverable
+  }
+  
+  // Weight adjustments
+  if (weight > 180) lengthInches += 2; // Heavier surfers need more volume/length
+  if (weight < 140) lengthInches -= 2; // Lighter surfers can go shorter
+  
+  return Math.round(lengthInches);
+}
+
+// Check if a board length is suitable for a rider
+function isBoardSizeSuitable(boardLengthCm, recommendedLengthCm, tolerance = 5) {
+  if (!boardLengthCm || !recommendedLengthCm) return false;
+  return Math.abs(boardLengthCm - recommendedLengthCm) <= tolerance;
+}
+
+// Generate size-specific match reasons
+function generateSizeMatchReason(boardLengthCm, recommendedLengthCm, boardType = 'board') {
+  if (!boardLengthCm || !recommendedLengthCm) return null;
+  
+  const diff = boardLengthCm - recommendedLengthCm;
+  const absDiff = Math.abs(diff);
+  
+  if (absDiff <= 2) {
+    return `Perfect ${boardType} length for your height and style`;
+  } else if (absDiff <= 5) {
+    if (diff > 0) {
+      return `Slightly longer ${boardType} - gives more stability and float`;
+    } else {
+      return `Slightly shorter ${boardType} - more maneuverable and playful`;
+    }
+  } else if (absDiff <= 8) {
+    if (diff > 0) {
+      return `Longer ${boardType} - excellent for stability and powder`;
+    } else {
+      return `Shorter ${boardType} - great for tricks and tight turns`;
+    }
+  } else {
+    return `${boardType.charAt(0).toUpperCase() + boardType.slice(1)} size may not be optimal for your measurements`;
+  }
+}
+
+// Enhanced size and physical compatibility matching
