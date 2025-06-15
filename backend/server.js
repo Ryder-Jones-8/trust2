@@ -434,6 +434,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
 // Recommendations API - Updated to match frontend expectations
 app.post('/api/recommendations', async (req, res) => {
   try {
+    console.log('Received recommendations request:', req.body);
     const { sport, category, formData, shopId } = req.body;
     
     if (!sport || !formData) {
@@ -443,13 +444,17 @@ app.post('/api/recommendations', async (req, res) => {
     // Generate session token
     const sessionToken = uuidv4();
 
-    // Store customer session
-    await query(
-      'INSERT INTO customer_sessions (session_token, shop_id, sport, customer_data) VALUES ($1, $2, $3, $4)',
-      [sessionToken, shopId, sport, formData]
-    );
-
-    // Get products for recommendations
+    // Store customer session (shopId can be null for general recommendations)
+    try {
+      await query(
+        'INSERT INTO customer_sessions (session_token, shop_id, sport, customer_data) VALUES ($1, $2, $3, $4)',
+        [sessionToken, shopId || null, sport, formData]
+      );
+      console.log('Customer session stored successfully');
+    } catch (sessionError) {
+      console.error('Error storing customer session:', sessionError);
+      // Continue without storing session if it fails
+    }    // Get products for recommendations
     let recommendationQuery = 'SELECT * FROM products WHERE sport = $1';
     const params = [sport];
 
@@ -465,7 +470,9 @@ app.post('/api/recommendations', async (req, res) => {
 
     recommendationQuery += ' AND inventory_count > 0 ORDER BY RANDOM() LIMIT 10';
 
+    console.log('Executing query:', recommendationQuery, 'with params:', params);
     const recommendationsResult = await query(recommendationQuery, params);
+    console.log('Query returned', recommendationsResult.rows.length, 'products');
     
     const recommendations = recommendationsResult.rows.map(product => ({
       id: product.id,
@@ -479,19 +486,27 @@ app.post('/api/recommendations', async (req, res) => {
       inStock: product.inventory_count > 0,
       quantity: product.inventory_count,
       score: Math.floor(Math.random() * 30) + 70, // Mock match score 70-100%
-      matchReasons: ['Good match for experience level', 'Price range match', 'Popular choice']
+      matchReasons: ['Good match for experience level', 'Price range match', 'Popular choice'],
+      features: Array.isArray(product.specifications?.features) ? product.specifications.features : []
     }));
 
-    // Update session with recommendations
-    await query(
-      'UPDATE customer_sessions SET recommendations = $1 WHERE session_token = $2',
-      [JSON.stringify(recommendations), sessionToken]
-    );
+    // Update session with recommendations if session was stored
+    try {
+      await query(
+        'UPDATE customer_sessions SET recommendations = $1 WHERE session_token = $2',
+        [JSON.stringify(recommendations), sessionToken]
+      );
+    } catch (updateError) {
+      console.error('Error updating session with recommendations:', updateError);
+      // Continue without updating session
+    }
 
+    console.log('Returning', recommendations.length, 'recommendations');
     res.json(recommendations);
   } catch (error) {
     console.error('Error generating recommendations:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
