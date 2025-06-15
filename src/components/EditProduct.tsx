@@ -332,7 +332,7 @@ const EditProduct: React.FC = () => {
             description: product.description || '',
             brand: product.brand || '',
             size: product.size || '',
-            features: product.features.join(', ')
+            features: Array.isArray(product.features) ? product.features.join(', ') : ''
           });
           setSpecifications(product.specifications || {});
         } else {

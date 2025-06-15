@@ -167,8 +167,8 @@ const ProductName = styled.h3`
   line-height: 1.3;
 `;
 
-const StockBadge = styled.span<{ lowStock: boolean }>`
-  background: ${props => props.lowStock ? '#ff6b6b' : '#4ecdc4'};
+const StockBadge = styled.span<{ $lowStock: boolean }>`
+  background: ${props => props.$lowStock ? '#ff6b6b' : '#4ecdc4'};
   color: #ffffff;
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
@@ -203,7 +203,7 @@ const ProductActions = styled.div`
   margin-top: 1rem;
 `;
 
-const ActionButton = styled.button<{ variant?: 'primary' | 'danger' }>`
+const ActionButton = styled.button<{ $variant?: 'primary' | 'danger' }>`
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #444;
@@ -212,7 +212,7 @@ const ActionButton = styled.button<{ variant?: 'primary' | 'danger' }>`
   cursor: pointer;
   transition: all 0.3s ease;
   
-  ${props => props.variant === 'primary' ? `
+  ${props => props.$variant === 'primary' ? `
     background: #2a2a2a;
     color: #ffffff;
     
@@ -220,7 +220,7 @@ const ActionButton = styled.button<{ variant?: 'primary' | 'danger' }>`
       background: #333;
       border-color: #666;
     }
-  ` : props.variant === 'danger' ? `
+  ` : props.$variant === 'danger' ? `
     background: transparent;
     color: #ff6b6b;
     border-color: #ff6b6b;
@@ -293,33 +293,78 @@ const ProductList: React.FC = () => {
   }, [products, searchTerm, sportFilter, categoryFilter]);
 
   const loadProducts = async () => {
+    console.log('🔄 DEBUG: Starting loadProducts function...');
+    console.log('🔍 DEBUG: Current timestamp:', new Date().toISOString());
+    
     try {
       setError('');
       const token = localStorage.getItem('token');
-      console.log('Loading products with token:', token ? 'present' : 'missing');
+      const shopOwner = localStorage.getItem('shopOwner');
+      
+      console.log('🔍 DEBUG: Token from localStorage:', token ? `PRESENT (${token.substring(0, 20)}...)` : 'MISSING');
+      console.log('🔍 DEBUG: Shop owner from localStorage:', shopOwner ? 'PRESENT' : 'MISSING');
+      console.log('🔍 DEBUG: Making request to http://localhost:3001/api/products');
+      console.log('🔍 DEBUG: Request headers will include Authorization:', token ? 'YES' : 'NO');
+      
+      const requestHeaders = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        requestHeaders['Authorization'] = `Bearer ${token}`;
+      }
+      
+      console.log('🔍 DEBUG: Final request headers:', requestHeaders);
       
       const response = await fetch('http://localhost:3001/api/products', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'GET',
+        headers: requestHeaders
       });
 
-      console.log('Products API response status:', response.status);
+      console.log('📊 DEBUG: Response received!');
+      console.log('📊 DEBUG: Response status:', response.status);
+      console.log('📊 DEBUG: Response ok:', response.ok);
+      console.log('� DEBUG: Response statusText:', response.statusText);
+      console.log('� DEBUG: Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (response.ok) {
-        const data = await response.json();
-        console.log('Products loaded:', data.length, 'items');
-        setProducts(data);
+        const responseText = await response.text();
+        console.log('📊 DEBUG: Raw response text length:', responseText.length);
+        console.log('📊 DEBUG: Raw response text preview:', responseText.substring(0, 200) + '...');
+        
+        try {
+          const data = JSON.parse(responseText);
+          console.log('✅ DEBUG: JSON parsed successfully!');
+          console.log('✅ DEBUG: Products array length:', Array.isArray(data) ? data.length : 'NOT AN ARRAY');
+          console.log('✅ DEBUG: Products data type:', typeof data);
+          
+          if (Array.isArray(data) && data.length > 0) {
+            console.log('🔍 DEBUG: First product:', data[0]);
+            console.log('🔍 DEBUG: Product properties:', Object.keys(data[0]));
+          }
+          
+          setProducts(data);
+          console.log('✅ DEBUG: Products state updated successfully');
+        } catch (parseError) {
+          console.error('❌ DEBUG: JSON parse error:', parseError);
+          setError('Failed to parse server response');
+        }
       } else {
-        const errorData = await response.json();
-        console.error('Failed to load products:', response.status, errorData);
-        setError(`Failed to load products: ${errorData.error || 'Unknown error'}`);
+        const errorText = await response.text();
+        console.error('❌ DEBUG: HTTP Error Response:', response.status, response.statusText);
+        console.error('❌ DEBUG: Error response body:', errorText);
+        setError(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
     } catch (error) {
-      console.error('Failed to load products:', error);
-      setError('Network error. Please check your connection and try again.');
+      console.error('💥 DEBUG: Network/Fetch error caught:', error);
+      console.error('💥 DEBUG: Error name:', error.name);
+      console.error('💥 DEBUG: Error message:', error.message);
+      console.error('💥 DEBUG: Error stack:', error.stack);
+      console.error('💥 DEBUG: Full error object:', error);
+      setError(`Network Error: ${error.message} (Check console for details)`);
     } finally {
       setIsLoading(false);
+      console.log('🏁 DEBUG: loadProducts function completed');
     }
   };
 
@@ -452,7 +497,7 @@ const ProductList: React.FC = () => {
               <ProductCard key={product.id}>
                 <ProductHeader>
                   <ProductName>{product.name}</ProductName>
-                  <StockBadge lowStock={product.quantity < 5}>
+                  <StockBadge $lowStock={product.quantity < 5}>
                     {product.quantity} in stock
                   </StockBadge>
                 </ProductHeader>
@@ -479,13 +524,13 @@ const ProductList: React.FC = () => {
                 </ProductMeta>
                   <ProductActions>
                   <ActionButton 
-                    variant="primary"
+                    $variant="primary"
                     onClick={() => handleEdit(product.id)}
                   >
                     Edit
                   </ActionButton>
                   <ActionButton 
-                    variant="danger"
+                    $variant="danger"
                     onClick={() => handleDelete(product.id)}
                   >
                     Delete
