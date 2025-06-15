@@ -293,7 +293,7 @@ app.post('/api/products', authenticateToken, upload.single('image'), async (req,
     const result = await query(
       `INSERT INTO products (shop_id, name, category, sport, price, description, specifications, inventory_count, image_url) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [req.shop.id, name, category, sport, price, description, finalSpecs, quantity || 0, imageUrl]
+      [req.shop.id, name, category, sport, price, description, finalSpecs, parseInt(quantity, 10) || 0, imageUrl]
     );    const product = result.rows[0];
     res.status(201).json({
       id: product.id,
@@ -313,6 +313,42 @@ app.post('/api/products', authenticateToken, upload.single('image'), async (req,
     });
   } catch (error) {
     console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get a single product by ID
+app.get('/api/products/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await query(
+      'SELECT * FROM products WHERE id = $1 AND shop_id = $2',
+      [id, req.shop.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product = result.rows[0];
+    res.json({
+      id: product.id,
+      shopId: product.shop_id,
+      name: product.name,
+      brand: product.specifications?.brand || '',
+      category: product.category,
+      sport: product.sport,
+      price: parseFloat(product.price),
+      description: product.description,
+      specifications: product.specifications,
+      inStock: product.inventory_count > 0,
+      quantity: product.inventory_count,
+      image: product.image_url,
+      createdAt: product.created_at,
+      updatedAt: product.updated_at
+    });
+  } catch (error) {
+    console.error('Error fetching product:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -343,7 +379,7 @@ app.put('/api/products/:id', authenticateToken, async (req, res) => {
        SET name = $1, category = $2, sport = $3, price = $4, description = $5, 
            specifications = $6, inventory_count = $7, image_url = $8, updated_at = CURRENT_TIMESTAMP
        WHERE id = $9 AND shop_id = $10 RETURNING *`,
-      [name, category, sport, price, description, finalSpecs, quantity, image, id, req.shop.id]
+      [name, category, sport, price, description, finalSpecs, parseInt(quantity, 10), image, id, req.shop.id]
     );
 
     if (result.rows.length === 0) {
