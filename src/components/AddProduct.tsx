@@ -693,19 +693,19 @@ const AddProduct: React.FC = () => {
                       <RangeLabel>Length Range</RangeLabel>
                       <SmallInput
                         type="number"
-                        placeholder="Min (in)"
-                        onChange={(e) => handleRangeChange('lengthRange', 'min', e.target.value, 'in')}
+                        placeholder="Min (cm)"
+                        onChange={(e) => handleRangeChange('lengthRange', 'min', e.target.value, 'cm')}
                       />
                     </div>
                     <div>
                       <RangeLabel>&nbsp;</RangeLabel>
                       <SmallInput
                         type="number"
-                        placeholder="Max (in)"
-                        onChange={(e) => handleRangeChange('lengthRange', 'max', e.target.value, 'in')}
+                        placeholder="Max (cm)"
+                        onChange={(e) => handleRangeChange('lengthRange', 'max', e.target.value, 'cm')}
                       />
                     </div>
-                    <UnitLabel>in</UnitLabel>
+                    <UnitLabel>cm</UnitLabel>
                   </RangeGroup>                  <RangeGroup>
                     <div>
                       <RangeLabel>Rider Weight Capacity</RangeLabel>

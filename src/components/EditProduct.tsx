@@ -687,21 +687,21 @@ const EditProduct: React.FC = () => {
                       <RangeLabel>Length Range</RangeLabel>
                       <SmallInput
                         type="number"
-                        placeholder="Min (in)"
+                        placeholder="Min (cm)"
                         value={specifications.lengthRange?.min || ''}
-                        onChange={(e) => handleRangeChange('lengthRange', 'min', e.target.value, 'in')}
+                        onChange={(e) => handleRangeChange('lengthRange', 'min', e.target.value, 'cm')}
                       />
                     </div>
                     <div>
                       <RangeLabel>&nbsp;</RangeLabel>
                       <SmallInput
                         type="number"
-                        placeholder="Max (in)"
+                        placeholder="Max (cm)"
                         value={specifications.lengthRange?.max || ''}
-                        onChange={(e) => handleRangeChange('lengthRange', 'max', e.target.value, 'in')}
+                        onChange={(e) => handleRangeChange('lengthRange', 'max', e.target.value, 'cm')}
                       />
                     </div>
-                    <UnitLabel>in</UnitLabel>
+                    <UnitLabel>cm</UnitLabel>
                   </RangeGroup>                  <RangeGroup>
                     <div>
                       <RangeLabel>Rider Weight Capacity</RangeLabel>
