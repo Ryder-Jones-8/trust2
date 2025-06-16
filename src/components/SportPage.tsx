@@ -111,23 +111,23 @@ const sportCategories = {
     { name: 'snowboards', icon: '🏂' },
     { name: 'skis', icon: '⛷️' },
     { name: 'snowboard boots', icon: '🥾' },
-    { name: 'ski boots', icon: '👢' },
-    { name: 'helmets', icon: '⛑️' },
+    { name: 'ski boots', icon: '🎿' },
+    { name: 'helmets', icon: '🪖' },
     { name: 'goggles', icon: '🥽' }
   ],
   snow: [
     { name: 'Snowboards', icon: '🏂' },
     { name: 'Skis', icon: '⛷️' },
     { name: 'Snowboard Boots', icon: '🥾' },
-    { name: 'Ski Boots', icon: '👢' },
-    { name: 'Helmets', icon: '⛑️' },
+    { name: 'Ski Boots', icon: '🎿' },
+    { name: 'Helmets', icon: '🪖' },
     { name: 'Goggles', icon: '🥽' }
   ],
   skate: [
     { name: 'decks', icon: '🛹' },
     { name: 'trucks', icon: '🔧' },
     { name: 'wheels', icon: '⚙️' },
-    { name: 'helmets', icon: '⛑️' }
+    { name: 'helmets', icon: '🪖' }
   ]
 }
 

@@ -336,15 +336,15 @@ const getSportIcon = (sport: string, category: string): string => {
       skis: '⛷️',
       boots: '👢',
       'snowboard boots': '🥾',
-      'ski boots': '👢',
-      helmets: '⛑️',
+      'ski boots': '🎿',
+      helmets: '🪖',
       goggles: '🥽'
     },
     skate: {
       decks: '🛹',
       trucks: '🔧',
       wheels: '⚙️',
-      helmets: '⛑️'
+      helmets: '🪖'
     }
   };
   
