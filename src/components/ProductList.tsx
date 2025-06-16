@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig';
 
 const Container = styled.div`
   width: 100vw;
@@ -303,7 +304,7 @@ const ProductList: React.FC = () => {
       
       console.log('🔍 DEBUG: Token from localStorage:', token ? `PRESENT (${token.substring(0, 20)}...)` : 'MISSING');
       console.log('🔍 DEBUG: Shop owner from localStorage:', shopOwner ? 'PRESENT' : 'MISSING');
-      console.log('🔍 DEBUG: Making request to http://localhost:3001/api/products');
+      console.log(`🔍 DEBUG: Making request to ${API_BASE_URL}/api/products`);
       console.log('🔍 DEBUG: Request headers will include Authorization:', token ? 'YES' : 'NO');
       
       const requestHeaders: Record<string, string> = {
@@ -316,7 +317,7 @@ const ProductList: React.FC = () => {
       
       console.log('🔍 DEBUG: Final request headers:', requestHeaders);
       
-      const response = await fetch('http://localhost:3001/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'GET',
         headers: requestHeaders
       });
@@ -400,7 +401,7 @@ const ProductList: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/products/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

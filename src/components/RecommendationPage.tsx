@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import type { RecommendationProduct } from '../types'
 import type { FormData as CustomFormData } from '../types'
+import { API_BASE_URL } from '../apiConfig'
 
 const RecommendationContainer = styled.div`
   min-height: 100vh;
@@ -400,7 +401,7 @@ const RecommendationPage = () => {
         }
       }
 
-      const response = await fetch('http://localhost:3001/api/recommendations', {
+      const response = await fetch(`${API_BASE_URL}/api/recommendations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -493,8 +494,8 @@ const RecommendationPage = () => {
             <ProductCard key={product.id}>
               <ProductImage>
                 {product.image ? (
-                  <img 
-                    src={`http://localhost:3001/uploads/${product.image}`} 
+                  <img
+                    src={`${API_BASE_URL}/uploads/${product.image}`}
                     alt={product.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }}
                   />

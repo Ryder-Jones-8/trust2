@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../apiConfig';
 import styled from 'styled-components';
 
 const HomeContainer = styled.div`
@@ -290,7 +291,7 @@ const HomePage = () => {
     if (!shopOwner) return
     setError('')
     try {
-      const response = await fetch('http://localhost:3001/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: shopOwner.email, password })

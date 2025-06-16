@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import type { ProductSpecifications, SpecificationRange } from '../types';
+import { API_BASE_URL } from '../apiConfig';
 
 const Container = styled.div`
   width: 100vw;
@@ -375,7 +376,7 @@ const AddProduct: React.FC = () => {
         hasImage: !!imageFile
       });
 
-      const response = await fetch('http://localhost:3001/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
