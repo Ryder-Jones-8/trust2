@@ -735,8 +735,7 @@ app.post('/api/recommendations', async (req, res) => {
             }
           }
         }
-        
-        // Surfboard length matching based on rider characteristics
+          // Surfboard length matching based on rider characteristics
         else if (product.category === 'boards' && product.sport === 'surf' && heightInches && weightLbs && product.specifications?.lengthRange) {
           totalSizeChecks++;
           const recommendedLength = calculateSurfboardLength(
@@ -772,6 +771,118 @@ app.post('/api/recommendations', async (req, res) => {
               }
             } else {
               matchReasons.push(`Surfboard length may not be optimal for your height and style`);
+              baseScore += 5;
+            }
+          }
+        }
+        
+        // Skateboard deck width matching based on rider characteristics
+        else if (product.category === 'decks' && product.sport === 'skate' && product.specifications?.deckWidthRange) {
+          totalSizeChecks++;
+          const recommendedWidth = calculateSkateboardDeckWidth(
+            formData.shoeSize,
+            formData.ridingStyle || formData.skateStyle,
+            formData.height
+          );
+          
+          if (recommendedWidth) {
+            const minWidth = product.specifications.deckWidthRange.min;
+            const maxWidth = product.specifications.deckWidthRange.max;
+            
+            if (recommendedWidth >= minWidth - 0.25 && recommendedWidth <= maxWidth + 0.25) {
+              sizeMatches++;
+              const reason = generateSizeMatchReason(
+                (minWidth + maxWidth) / 2,
+                recommendedWidth,
+                'skateboard'
+              );
+              if (reason) {
+                matchReasons.push(reason);
+                // Give higher scores for perfect matches
+                if (Math.abs(((minWidth + maxWidth) / 2) - recommendedWidth) <= 0.125) {
+                  baseScore += 25;
+                } else if (Math.abs(((minWidth + maxWidth) / 2) - recommendedWidth) <= 0.25) {
+                  baseScore += 18;
+                } else {
+                  baseScore += 12;
+                }
+              }
+            } else {
+              const avgWidth = (minWidth + maxWidth) / 2;
+              const diff = Math.abs(avgWidth - recommendedWidth);
+              if (diff <= 0.5) {
+                matchReasons.push(`Deck width workable but not optimal for your shoe size`);
+                baseScore += 5;
+              } else {
+                matchReasons.push(`Deck width may not be ideal for your measurements`);
+                baseScore += 2;
+              }
+            }
+          }
+        }
+        
+        // Helmet sizing based on head circumference
+        else if ((product.category === 'helmets') && formData.headCircumference && product.specifications?.headCircumferenceRange) {
+          totalSizeChecks++;
+          const recommendedSize = calculateHelmetSize(formData.headCircumference);
+          
+          // Parse head circumference to inches for range comparison
+          let headInches;
+          const str = formData.headCircumference.toString().toLowerCase();
+          if (str.includes('cm')) {
+            headInches = parseFloat(str.replace(/[^\d.]/g, '')) / 2.54;
+          } else {
+            headInches = parseFloat(str.replace(/[^\d.]/g, ''));
+          }
+          
+          if (headInches && product.specifications.headCircumferenceRange) {
+            const minCirc = product.specifications.headCircumferenceRange.min;
+            const maxCirc = product.specifications.headCircumferenceRange.max;
+            
+            if (headInches >= minCirc && headInches <= maxCirc) {
+              sizeMatches++;
+              matchReasons.push(`Perfect helmet fit for ${recommendedSize} head circumference`);
+              baseScore += 25;
+            } else {
+              const diff = headInches < minCirc ? minCirc - headInches : headInches - maxCirc;
+              if (diff <= 0.5) {
+                matchReasons.push(`Close helmet fit, may work with padding adjustment`);
+                baseScore += 12;
+              } else {
+                matchReasons.push(`Helmet size may not be optimal for your head circumference`);
+                baseScore += 5;
+              }
+            }
+          }
+        }
+        
+        // Wetsuit sizing based on height, weight, and chest measurements
+        else if (product.category === 'wetsuits' && heightInches && weightLbs && product.specifications?.sizeOptions) {
+          totalSizeChecks++;
+          const recommendedSize = calculateWetsuitSize(
+            formData.height,
+            formData.weight,
+            formData.chestSize
+          );
+          
+          if (recommendedSize && product.specifications.sizeOptions.includes(recommendedSize)) {
+            sizeMatches++;
+            matchReasons.push(`Perfect wetsuit size (${recommendedSize}) for your measurements`);
+            baseScore += 25;
+          } else if (recommendedSize) {
+            // Check for adjacent sizes
+            const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            const recIndex = sizes.indexOf(recommendedSize);
+            const hasAdjacentSize = product.specifications.sizeOptions.some(size => {
+              const sizeIndex = sizes.indexOf(size);
+              return Math.abs(sizeIndex - recIndex) <= 1;
+            });
+            
+            if (hasAdjacentSize) {
+              matchReasons.push(`Close wetsuit size available, may fit with slight adjustment`);
+              baseScore += 15;
+            } else {
+              matchReasons.push(`Wetsuit size may not be optimal for your measurements`);
               baseScore += 5;
             }
           }
@@ -818,18 +929,144 @@ app.post('/api/recommendations', async (req, res) => {
             }
           }
         }
-        
-        // If no specific size data available
+          // If no specific size data available
         if (totalSizeChecks === 0) {
           matchReasons.push('Size compatibility to be verified in store');
           baseScore += 3;
         }
       }
       
-      // Brand reputation / quality indicators
-      const premiumBrands = ['burton', 'rossignol', 'k2', 'salomon', 'atomic', 'völkl'];
+      // Sport-specific feature matching
+      const productDesc = (product.description || '').toLowerCase();
+      const productFeatures = product.specifications?.features || [];
+      
+      if (product.sport === 'ski') {
+        // Terrain preference matching for ski equipment
+        if (formData.terrainPreference) {
+          const terrain = formData.terrainPreference.toLowerCase();
+          const terrainMatches = {
+            'groomed': ['groomed', 'carving', 'piste', 'on-piste'],
+            'powder': ['powder', 'off-piste', 'backcountry', 'deep snow'],
+            'park': ['park', 'freestyle', 'terrain park', 'pipe'],
+            'all-mountain': ['all-mountain', 'versatile', 'all-terrain']
+          };
+          
+          const relevantTerms = terrainMatches[terrain] || [];
+          const hasTerrainMatch = relevantTerms.some(term => 
+            productDesc.includes(term) || 
+            productFeatures.some(feature => feature.toLowerCase().includes(term))
+          );
+          
+          if (hasTerrainMatch) {
+            matchReasons.push(`Designed for ${formData.terrainPreference} terrain`);
+            baseScore += 15;
+          }
+        }
+        
+        // Temperature/conditions matching
+        if (formData.conditions) {
+          const conditions = formData.conditions.toLowerCase();
+          if (conditions.includes('cold') && (productDesc.includes('warm') || productDesc.includes('insulated'))) {
+            matchReasons.push('Good warmth for cold conditions');
+            baseScore += 10;
+          } else if (conditions.includes('wet') && (productDesc.includes('waterproof') || productDesc.includes('gore-tex'))) {
+            matchReasons.push('Waterproof protection for wet conditions');
+            baseScore += 10;
+          }
+        }
+      } else if (product.sport === 'surf') {
+        // Wave conditions matching
+        if (formData.waveConditions) {
+          const waves = formData.waveConditions.toLowerCase();
+          const waveMatches = {
+            'small': ['small wave', 'groveler', 'summer', 'longboard'],
+            'medium': ['all-around', 'versatile', 'daily driver'],
+            'large': ['big wave', 'gun', 'step-up', 'charger'],
+            'powerful': ['performance', 'high performance', 'responsive']
+          };
+          
+          const relevantTerms = waveMatches[waves] || [];
+          const hasWaveMatch = relevantTerms.some(term => 
+            productDesc.includes(term) || 
+            productFeatures.some(feature => feature.toLowerCase().includes(term))
+          );
+          
+          if (hasWaveMatch) {
+            matchReasons.push(`Perfect for ${formData.waveConditions} wave conditions`);
+            baseScore += 15;
+          }
+        }
+        
+        // Water temperature matching for wetsuits
+        if (product.category === 'wetsuits' && formData.waterTemp) {
+          const temp = formData.waterTemp.toLowerCase();
+          const tempMatches = {
+            'cold': ['5/4', '6/5', '5mm', '6mm', 'winter', 'cold water'],
+            'cool': ['4/3', '3/2', '4mm', '3mm', 'spring', 'fall'],
+            'warm': ['2mm', '1mm', 'spring suit', 'summer', 'warm water'],
+            'tropical': ['rash guard', 'sun protection', 'thermal protection']
+          };
+          
+          const relevantTerms = tempMatches[temp] || [];
+          const hasTempMatch = relevantTerms.some(term => 
+            productDesc.includes(term) || 
+            productFeatures.some(feature => feature.toLowerCase().includes(term))
+          );
+          
+          if (hasTempMatch) {
+            matchReasons.push(`Ideal thickness for ${formData.waterTemp} water`);
+            baseScore += 20;
+          }
+        }
+      } else if (product.sport === 'skate') {
+        // Surface type matching
+        if (formData.surface) {
+          const surface = formData.surface.toLowerCase();
+          const surfaceMatches = {
+            'street': ['street', 'technical', 'hard wheels', '99a', '101a'],
+            'park': ['park', 'bowl', 'vert', 'transition'],
+            'cruising': ['cruising', 'soft wheels', '78a', '85a', 'transportation'],
+            'rough': ['all-terrain', 'soft wheels', '78a', '85a', 'rough surface']
+          };
+          
+          const relevantTerms = surfaceMatches[surface] || [];
+          const hasSurfaceMatch = relevantTerms.some(term => 
+            productDesc.includes(term) || 
+            productFeatures.some(feature => feature.toLowerCase().includes(term))
+          );
+          
+          if (hasSurfaceMatch) {
+            matchReasons.push(`Designed for ${formData.surface} skating`);
+            baseScore += 15;
+          }
+        }
+        
+        // Trick difficulty matching
+        if (formData.trickLevel) {
+          const tricks = formData.trickLevel.toLowerCase();
+          if (tricks.includes('beginner') && (productDesc.includes('forgiving') || productDesc.includes('stable'))) {
+            matchReasons.push('Beginner-friendly and forgiving');
+            baseScore += 10;
+          } else if (tricks.includes('advanced') && (productDesc.includes('responsive') || productDesc.includes('precision'))) {
+            matchReasons.push('Responsive setup for advanced tricks');
+            baseScore += 10;
+          }
+        }
+      }
+        // Brand reputation / quality indicators
+      const premiumBrands = {
+        ski: ['burton', 'rossignol', 'k2', 'salomon', 'atomic', 'völkl', 'nordica', 'dynastar', 'blizzard'],
+        surf: ['lost', 'chanel islands', 'firewire', 'stewart', 'rusty', 'maurice cole', 'album', 'sharp eye', 'pyzel', 'mayhem'],
+        skate: ['element', 'enjoi', 'plan b', 'girl', 'chocolate', 'baker', 'zero', 'real', 'krooked', 'anti hero', 'independent', 'thunder', 'venture', 'bones', 'spitfire', 'ricta']
+      };
+      
+      const brandCategories = premiumBrands[product.sport] || [];
       const brand = (product.brand || '').toLowerCase();
-      if (premiumBrands.includes(brand)) {
+      const isPremiumBrand = brandCategories.some(premiumBrand => 
+        brand.includes(premiumBrand.toLowerCase()) || premiumBrand.toLowerCase().includes(brand)
+      );
+      
+      if (isPremiumBrand) {
         matchReasons.push('Trusted premium brand');
         baseScore += 5;
       }
@@ -932,104 +1169,300 @@ function parsePriceRange(priceRange) {
   return ranges[priceRange] || { min: 0, max: Infinity };
 }
 
-// Analytics API - Updated to match frontend expectations
-app.get('/api/analytics/overview', authenticateToken, async (req, res) => {
-  try {
-    // Get basic statistics for the shop
-    const statsQueries = await Promise.all([
-      query('SELECT COUNT(*) as total_products FROM products WHERE shop_id = $1', [req.shop.id]),
-      query('SELECT SUM(inventory_count) as total_inventory FROM products WHERE shop_id = $1', [req.shop.id]),
-      query('SELECT COUNT(*) as total_sessions FROM customer_sessions WHERE shop_id = $1', [req.shop.id]),
-      query('SELECT AVG(price) as avg_price FROM products WHERE shop_id = $1 AND inventory_count > 0', [req.shop.id]),
-      query(`SELECT category, COUNT(*) as count, SUM(inventory_count * price) as value 
-             FROM products WHERE shop_id = $1 GROUP BY category`, [req.shop.id])
-    ]);
+// ======= SIZING CALCULATION FUNCTIONS =======
 
-    const categoryBreakdown = {};
-    statsQueries[4].rows.forEach(row => {
-      categoryBreakdown[row.category] = {
-        count: parseInt(row.count),
-        value: parseFloat(row.value) || 0
-      };
-    });
-
-    const analytics = {
-      totalProducts: parseInt(statsQueries[0].rows[0].total_products),
-      totalInventory: parseInt(statsQueries[1].rows[0].total_inventory) || 0,
-      customerSessions: parseInt(statsQueries[2].rows[0].total_sessions),
-      averagePrice: parseFloat(statsQueries[3].rows[0].avg_price) || 0,
-      categoryBreakdown,
-      // Mock additional data that matches frontend expectations
-      totalRevenue: 24750.50,
-      totalSales: 142,
-      averageOrderValue: 174.30,
-      revenueChange: 12.5,
-      salesChange: 8.3
-    };
-
-    res.json(analytics);
-  } catch (error) {
-    console.error('Error fetching analytics:', error);
-    res.status(500).json({ error: 'Internal server error' });
+// Parse height from various formats to inches
+function parseHeight(heightStr) {
+  if (!heightStr) return null;
+  
+  const str = heightStr.toString().toLowerCase();
+  
+  // Handle cm format first (before general number matching)
+  const cmMatch = str.match(/(\d+)\s*cm/);
+  if (cmMatch) {
+    return parseInt(cmMatch[1]) / 2.54; // Convert cm to inches
   }
-});
-
-// Shop settings API
-app.get('/api/shop/settings', authenticateToken, async (req, res) => {
-  try {
-    const result = await query('SELECT * FROM shops WHERE id = $1', [req.shop.id]);
-    const shop = result.rows[0];
-
-    res.json({
-      id: shop.id,
-      name: shop.name,
-      email: shop.email,
-      location: shop.location,
-      settings: shop.settings || {}
-    });
-  } catch (error) {
-    console.error('Error fetching shop settings:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  
+  // Handle feet and inches format (5'10", 5 feet 10 inches, etc.)
+  const feetInchesMatch = str.match(/(\d+)['']?\s*(?:feet?\s*)?(\d+)['"]?\s*(?:inches?)?/);
+  if (feetInchesMatch) {
+    const feet = parseInt(feetInchesMatch[1]);
+    const inches = parseInt(feetInchesMatch[2]);
+    return (feet * 12) + inches;
   }
-});
-
-app.put('/api/shop/settings', authenticateToken, async (req, res) => {
-  try {
-    const { name, location, settings } = req.body;
-
-    const result = await query(
-      'UPDATE shops SET name = $1, location = $2, settings = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
-      [name, location, settings || {}, req.shop.id]
-    );
-
-    const shop = result.rows[0];
-    res.json({
-      id: shop.id,
-      name: shop.name,
-      email: shop.email,
-      location: shop.location,
-      settings: shop.settings
-    });
-  } catch (error) {
-    console.error('Error updating shop settings:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// File upload endpoint
-app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+    // Handle feet only format (5', 6 feet, etc.) - but not large numbers
+  const feetOnlyMatch = str.match(/(\d+)['']?\s*(?:feet?|ft)\s*$/);
+  if (feetOnlyMatch) {
+    const value = parseInt(feetOnlyMatch[1]);
+    // Don't treat large numbers as feet
+    if (value <= 8) {
+      return value * 12;
     }
-
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ imageUrl });
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).json({ error: 'Internal server error' });
   }
-});
+  
+  // Handle explicit inches
+  const explicitInchesMatch = str.match(/(\d+)\s*(?:inches?|in)\s*$/);
+  if (explicitInchesMatch) {
+    return parseInt(explicitInchesMatch[1]);
+  }
+  
+  // Handle just numbers - assume cm if large, inches if small
+  const numberMatch = str.match(/^(\d+)\s*$/);
+  if (numberMatch) {
+    const value = parseInt(numberMatch[1]);
+    // If it's a large number without explicit units, assume it's cm
+    if (value > 100) {
+      return value / 2.54;
+    }
+    return value; // Small numbers assumed to be inches
+  }
+  
+  return null;
+}
+
+// Parse weight from various formats to pounds
+function parseWeight(weightStr) {
+  if (!weightStr) return null;
+  
+  const str = weightStr.toString().toLowerCase();
+  
+  // Handle kg format first
+  const kgMatch = str.match(/(\d+)\s*kg/);
+  if (kgMatch) {
+    return parseInt(kgMatch[1]) * 2.205; // Convert kg to lbs
+  }
+  
+  // Handle pounds format
+  const lbsMatch = str.match(/(\d+)\s*(?:lbs?|pounds?)/);
+  if (lbsMatch) {
+    return parseInt(lbsMatch[1]);
+  }
+  
+  // Handle just numbers - assume lbs for US context unless very low (likely kg)
+  const numberMatch = str.match(/(\d+)\s*$/);
+  if (numberMatch) {
+    const value = parseInt(numberMatch[1]);
+    // If it's under 200 and no explicit unit, could be either
+    // Use context: if under 50, probably kg; if over 250, probably lbs
+    if (value < 50) {
+      return value * 2.205; // Treat as kg
+    } else {
+      return value; // Treat as lbs
+    }
+  }
+  
+  return null;
+}
+
+// Calculate ideal snowboard length based on rider characteristics
+function calculateSnowboardLength(heightInches, weightLbs, ridingStyle, experience) {
+  if (!heightInches) return null;
+  
+  // Base calculation: height in cm minus adjustment
+  const heightCm = heightInches * 2.54;
+  let baseLength = heightCm;
+  
+  // Adjust based on riding style
+  const styleAdjustments = {
+    'freestyle': -8,     // Shorter for tricks and maneuverability
+    'park': -8,
+    'freeride': +5,      // Longer for stability and float
+    'all-mountain': 0,   // Standard length
+    'powder': +8,        // Longer for deep snow
+    'racing': +3,        // Slightly longer for stability
+    'carving': +3
+  };
+  
+  const style = ridingStyle ? ridingStyle.toLowerCase() : 'all-mountain';
+  const styleAdj = styleAdjustments[style] || 0;
+  baseLength += styleAdj;
+  
+  // Adjust based on experience level
+  const experienceAdjustments = {
+    'beginner': -5,      // Shorter for easier control
+    'intermediate': 0,   // Standard
+    'advanced': +3,      // Can handle longer boards
+    'expert': +5
+  };
+  
+  const exp = experience ? experience.toLowerCase() : 'intermediate';
+  const expAdj = experienceAdjustments[exp] || 0;
+  baseLength += expAdj;
+  
+  // Weight adjustment (if available)
+  if (weightLbs) {
+    if (weightLbs < 120) baseLength -= 3;
+    else if (weightLbs > 180) baseLength += 3;
+    else if (weightLbs > 220) baseLength += 6;
+  }
+  
+  return Math.round(baseLength);
+}
+
+// Calculate ideal surfboard length based on rider characteristics
+function calculateSurfboardLength(heightInches, weightLbs, experience, surfStyle) {
+  if (!heightInches || !weightLbs) return null;
+  
+  // Base calculation for surfboard length in inches
+  let baseLength = heightInches;
+  
+  // Adjust based on experience level
+  const experienceAdjustments = {
+    'beginner': +8,      // Longer boards for stability
+    'intermediate': +2,  // Slightly longer
+    'advanced': -2,      // Shorter for performance
+    'expert': -4
+  };
+  
+  const exp = experience ? experience.toLowerCase() : 'intermediate';
+  const expAdj = experienceAdjustments[exp] || 0;
+  baseLength += expAdj;
+  
+  // Adjust based on surf style
+  const styleAdjustments = {
+    'longboard': +18,    // Much longer
+    'funboard': +8,      // Moderately longer
+    'shortboard': -6,    // Shorter for performance
+    'fish': -3,          // Slightly shorter but wider
+    'gun': +12           // Longer for big waves
+  };
+  
+  const style = surfStyle ? surfStyle.toLowerCase() : 'funboard';
+  const styleAdj = styleAdjustments[style] || 0;
+  baseLength += styleAdj;
+  
+  // Weight adjustments
+  if (weightLbs < 130) baseLength -= 2;
+  else if (weightLbs > 180) baseLength += 2;
+  else if (weightLbs > 220) baseLength += 4;
+  
+  return Math.round(baseLength);
+}
+
+// Calculate ideal skateboard deck width based on rider characteristics
+function calculateSkateboardDeckWidth(shoeSize, ridingStyle, height) {
+  // Base deck width calculation
+  let baseWidth = 8.0; // Standard width in inches
+  
+  // Adjust based on shoe size
+  if (shoeSize) {
+    const size = parseFloat(shoeSize);
+    if (size < 7) baseWidth = 7.5;
+    else if (size < 9) baseWidth = 7.75;
+    else if (size < 10.5) baseWidth = 8.0;
+    else if (size < 12) baseWidth = 8.25;
+    else baseWidth = 8.5;
+  }
+  
+  // Adjust based on riding style
+  const styleAdjustments = {
+    'street': -0.25,     // Narrower for technical tricks
+    'park': -0.125,      // Slightly narrower
+    'vert': +0.25,       // Wider for stability
+    'cruising': +0.5,    // Much wider for comfort
+    'downhill': +0.75    // Widest for stability at speed
+  };
+  
+  const style = ridingStyle ? ridingStyle.toLowerCase() : 'street';
+  const styleAdj = styleAdjustments[style] || 0;
+  baseWidth += styleAdj;
+  
+  // Height adjustment for very tall or short riders
+  if (height) {
+    const heightInches = parseHeight(height);
+    if (heightInches) {
+      if (heightInches < 60) baseWidth -= 0.25; // Under 5 feet
+      else if (heightInches > 72) baseWidth += 0.25; // Over 6 feet
+    }
+  }
+  
+  return Math.round(baseWidth * 4) / 4; // Round to nearest quarter inch
+}
+
+// Generate detailed size match explanations
+function generateSizeMatchReason(productSize, recommendedSize, productType) {
+  const diff = Math.abs(productSize - recommendedSize);
+  
+  if (productType === 'snowboard') {
+    if (diff <= 2) {
+      return `Perfect snowboard length (${Math.round(productSize)}cm) for your height and style`;
+    } else if (diff <= 5) {
+      return `Good snowboard length (${Math.round(productSize)}cm), within optimal range for your measurements`;
+    } else if (diff <= 8) {
+      return `Workable snowboard length (${Math.round(productSize)}cm), slight adjustment needed for optimal fit`;
+    }
+  } else if (productType === 'surfboard') {
+    if (diff <= 3) {
+      return `Ideal surfboard length (${Math.round(productSize/2.54)}'${Math.round((productSize/2.54 % 1) * 12)}") for your experience and style`;
+    } else if (diff <= 6) {
+      return `Good surfboard length (${Math.round(productSize/2.54)}'${Math.round((productSize/2.54 % 1) * 12)}"), suitable for your level`;
+    } else if (diff <= 10) {
+      return `Alternative surfboard length (${Math.round(productSize/2.54)}'${Math.round((productSize/2.54 % 1) * 12)}"), may require style adjustment`;
+    }
+  } else if (productType === 'skateboard') {
+    if (diff <= 0.125) {
+      return `Perfect deck width (${productSize}") for your shoe size and style`;
+    } else if (diff <= 0.25) {
+      return `Good deck width (${productSize}"), very close to your ideal size`;
+    } else if (diff <= 0.5) {
+      return `Workable deck width (${productSize}"), slight difference from optimal`;
+    }
+  }
+  
+  return null;
+}
+
+// Calculate ideal helmet size based on head circumference
+function calculateHelmetSize(headCircumference) {
+  if (!headCircumference) return null;
+  
+  // Parse circumference - could be in inches or cm
+  let circumferenceInches;
+  const str = headCircumference.toString().toLowerCase();
+  
+  if (str.includes('cm')) {
+    const cm = parseFloat(str.replace(/[^\d.]/g, ''));
+    circumferenceInches = cm / 2.54;
+  } else {
+    circumferenceInches = parseFloat(str.replace(/[^\d.]/g, ''));
+  }
+  
+  if (!circumferenceInches) return null;
+  
+  // Standard helmet sizing
+  if (circumferenceInches < 20.5) return 'XS';
+  else if (circumferenceInches < 21.75) return 'S';
+  else if (circumferenceInches < 23) return 'M';
+  else if (circumferenceInches < 24.5) return 'L';
+  else return 'XL';
+}
+
+// Calculate wetsuit size based on height, weight, and chest measurements
+function calculateWetsuitSize(height, weight, chestSize) {
+  const heightInches = parseHeight(height);
+  const weightLbs = parseWeight(weight);
+  let chestInches = null;
+  
+  if (chestSize) {
+    const str = chestSize.toString().toLowerCase();
+    if (str.includes('cm')) {
+      chestInches = parseFloat(str.replace(/[^\d.]/g, '')) / 2.54;
+    } else {
+      chestInches = parseFloat(str.replace(/[^\d.]/g, ''));
+    }
+  }
+  
+  // Basic wetsuit sizing matrix (simplified)
+  if (!heightInches || !weightLbs) return null;
+  
+  // This is a simplified calculation - real wetsuit sizing is more complex
+  if (heightInches < 64 && weightLbs < 130) return 'XS';
+  else if (heightInches < 67 && weightLbs < 150) return 'S';
+  else if (heightInches < 70 && weightLbs < 170) return 'M';
+  else if (heightInches < 73 && weightLbs < 190) return 'L';
+  else if (heightInches < 76 && weightLbs < 210) return 'XL';
+  else return 'XXL';
+}
 
 // Error handling middleware
 app.use((error, req, res, next) => {
@@ -1054,133 +1487,3 @@ process.on('SIGINT', async () => {
   await pool.end();
   process.exit(0);
 });
-
-// Helper functions for parsing height and calculating board sizes
-function parseHeight(heightStr) {
-  if (!heightStr) return null;
-  
-  // Handle feet'inches" format like "5'10""
-  const feetInchesMatch = heightStr.match(/(\d+)'(\d+)"/);
-  if (feetInchesMatch) {
-    const feet = parseFloat(feetInchesMatch[1]);
-    const inches = parseFloat(feetInchesMatch[2]);
-    return (feet * 12) + inches; // Convert to total inches
-  }
-  
-  // Handle decimal feet format like "5.83"
-  const decimalMatch = heightStr.match(/[\d.]+/);
-  if (decimalMatch) {
-    const feet = parseFloat(decimalMatch[0]);
-    return feet * 12; // Convert to inches
-  }
-  
-  return null;
-}
-
-function parseWeight(weightStr) {
-  if (!weightStr) return null;
-  const match = weightStr.match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : null;
-}
-
-// Calculate recommended snowboard length based on height and riding style
-function calculateSnowboardLength(heightInches, weight, ridingStyle, experience) {
-  if (!heightInches) return null;
-  
-  // Base calculation: height in cm minus offset based on style
-  const heightCm = heightInches * 2.54;
-  let offset = 20; // Default offset for all-mountain
-  
-  // Adjust offset based on riding style
-  const style = (ridingStyle || '').toLowerCase();
-  if (style.includes('freestyle') || style.includes('park')) {
-    offset = 25; // Shorter for freestyle/park
-  } else if (style.includes('freeride') || style.includes('powder')) {
-    offset = 15; // Longer for freeride/powder
-  } else if (style.includes('carving') || style.includes('racing')) {
-    offset = 10; // Longer for carving/racing
-  }
-  
-  // Adjust for experience level
-  const exp = (experience || '').toLowerCase();
-  if (exp === 'beginner') {
-    offset += 5; // Beginners benefit from shorter boards
-  } else if (exp === 'advanced' || exp === 'expert') {
-    offset -= 5; // Advanced riders can handle longer boards
-  }
-  
-  // Weight adjustment
-  if (weight) {
-    if (weight > 180) offset -= 2; // Heavier riders need longer boards
-    if (weight < 140) offset += 2; // Lighter riders need shorter boards
-  }
-  
-  const recommendedLengthCm = heightCm - offset;
-  return Math.round(recommendedLengthCm);
-}
-
-// Calculate recommended surfboard length based on height, weight, and experience
-function calculateSurfboardLength(heightInches, weight, experience, surfStyle) {
-  if (!heightInches || !weight) return null;
-  
-  // Base calculation starts with height
-  let lengthInches = heightInches;
-  
-  // Adjust based on experience level
-  const exp = (experience || '').toLowerCase();
-  if (exp === 'beginner') {
-    lengthInches += 8; // Beginners need longer, more stable boards
-  } else if (exp === 'intermediate') {
-    lengthInches += 4;
-  } else if (exp === 'advanced' || exp === 'expert') {
-    lengthInches += 0; // Advanced riders can go shorter
-  }
-  
-  // Adjust based on surf style
-  const style = (surfStyle || '').toLowerCase();
-  if (style.includes('longboard')) {
-    lengthInches += 12; // Longboards are significantly longer
-  } else if (style.includes('shortboard')) {
-    lengthInches -= 4; // Shortboards are shorter and more maneuverable
-  }
-  
-  // Weight adjustments
-  if (weight > 180) lengthInches += 2; // Heavier surfers need more volume/length
-  if (weight < 140) lengthInches -= 2; // Lighter surfers can go shorter
-  
-  return Math.round(lengthInches);
-}
-
-// Check if a board length is suitable for a rider
-function isBoardSizeSuitable(boardLengthCm, recommendedLengthCm, tolerance = 5) {
-  if (!boardLengthCm || !recommendedLengthCm) return false;
-  return Math.abs(boardLengthCm - recommendedLengthCm) <= tolerance;
-}
-
-// Generate size-specific match reasons
-function generateSizeMatchReason(boardLengthCm, recommendedLengthCm, boardType = 'board') {
-  if (!boardLengthCm || !recommendedLengthCm) return null;
-  
-  const diff = boardLengthCm - recommendedLengthCm;
-  const absDiff = Math.abs(diff);
-  
-  if (absDiff <= 2) {
-    return `Perfect ${boardType} length for your height and style`;
-  } else if (absDiff <= 5) {
-    if (diff > 0) {
-      return `Slightly longer ${boardType} - gives more stability and float`;
-    } else {
-      return `Slightly shorter ${boardType} - more maneuverable and playful`;
-    }
-  } else if (absDiff <= 8) {
-    if (diff > 0) {
-      return `Longer ${boardType} - excellent for stability and powder`;
-    } else {
-      return `Shorter ${boardType} - great for tricks and tight turns`;
-    }
-  } else {
-    return `${boardType.charAt(0).toUpperCase() + boardType.slice(1)} size may not be optimal for your measurements`;
-  }
-}
-
-// Enhanced size and physical compatibility matching
