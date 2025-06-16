@@ -599,6 +599,22 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
                   <li><strong>Longer boards (nose to forehead height):</strong> More stable at speed, better float in powder</li>
                   <li><strong>Your style ({formData.ridingStyle}):</strong> Influences the optimal length within your range</li>
                 </ul>
+                <div style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '0.75rem', borderRadius: '5px', marginTop: '0.5rem'}}>
+                  <strong>📐 Quick Sizing Guide:</strong>
+                  <ul style={{margin: '0.25rem 0'}}>
+                    <li><strong>5'0" - 5'2":</strong> 142-147cm</li>
+                    <li><strong>5'2" - 5'4":</strong> 144-149cm</li>
+                    <li><strong>5'4" - 5'6":</strong> 146-151cm</li>
+                    <li><strong>5'6" - 5'8":</strong> 148-153cm</li>
+                    <li><strong>5'8" - 5'10":</strong> 150-155cm</li>
+                    <li><strong>5'10" - 6'0":</strong> 152-157cm</li>
+                    <li><strong>6'0" - 6'2":</strong> 154-159cm</li>
+                    <li><strong>6'2" - 6'4":</strong> 156-162cm</li>
+                  </ul>
+                  <p style={{margin: '0.25rem 0', fontSize: '0.85em', fontStyle: 'italic'}}>
+                    💡 <strong>Freestyle:</strong> Go 5-8cm shorter | <strong>Freeride:</strong> Go 3-5cm longer
+                  </p>
+                </div>
               </div>
             )
           },
@@ -897,6 +913,20 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
                   <li><strong>Intermediate:</strong> Moderate length, balanced volume for progression</li>
                   <li><strong>Advanced:</strong> Shorter, lower volume boards for performance</li>
                 </ul>
+                <div style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '0.75rem', borderRadius: '5px', marginTop: '0.5rem'}}>
+                  <strong>🏄‍♀️ Length by Experience & Weight:</strong>
+                  <ul style={{margin: '0.25rem 0'}}>
+                    <li><strong>Beginner (120-150 lbs):</strong> 8'6" - 9'6" longboard</li>
+                    <li><strong>Beginner (150-180 lbs):</strong> 9'0" - 10'0" longboard</li>
+                    <li><strong>Intermediate (120-150 lbs):</strong> 7'6" - 8'6" funboard</li>
+                    <li><strong>Intermediate (150-180 lbs):</strong> 8'0" - 9'0" funboard</li>
+                    <li><strong>Advanced (120-150 lbs):</strong> 5'8" - 6'4" shortboard</li>
+                    <li><strong>Advanced (150-180 lbs):</strong> 6'0" - 6'8" shortboard</li>
+                  </ul>
+                  <p style={{margin: '0.25rem 0', fontSize: '0.85em', fontStyle: 'italic'}}>
+                    💡 <strong>Volume rule:</strong> Beginner = 100% of body weight in liters, Advanced = 30-35%
+                  </p>
+                </div>
               </div>
             )
           },
@@ -1046,7 +1076,19 @@ const getEducationalContent = (sport: string, category: string, formData: Custom
                   <li><strong>8.0" - 8.5":</strong> Versatile, good for most skating</li>
                   <li><strong>8.5" +:</strong> Vert, pools, larger riders</li>
                 </ul>
-                <p>Your shoe size and skating style determine the best width for you.</p>
+                <div style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '0.75rem', borderRadius: '5px', marginTop: '0.5rem'}}>
+                  <strong>👟 Width by Shoe Size:</strong>
+                  <ul style={{margin: '0.25rem 0'}}>
+                    <li><strong>Size 6.5-7.5:</strong> 7.5" deck width</li>
+                    <li><strong>Size 8-9:</strong> 7.75" deck width</li>
+                    <li><strong>Size 9-10.5:</strong> 8.0" deck width</li>
+                    <li><strong>Size 10.5-12:</strong> 8.25" deck width</li>
+                    <li><strong>Size 12+:</strong> 8.5" deck width</li>
+                  </ul>
+                  <p style={{margin: '0.25rem 0', fontSize: '0.85em', fontStyle: 'italic'}}>
+                    💡 <strong>Style adjustment:</strong> Street = -0.25", Vert = +0.25", Cruising = +0.5"
+                  </p>
+                </div>
               </div>
             )
           },
