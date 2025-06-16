@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig';
 
 const Container = styled.div`
   width: 100vw;
@@ -251,7 +252,7 @@ const ShopSettings: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/shop/settings', {
+      const response = await fetch(`${API_BASE_URL}/api/shop/settings`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -300,7 +301,7 @@ const ShopSettings: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/shop/settings', {
+      const response = await fetch(`${API_BASE_URL}/api/shop/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -1122,53 +1122,6 @@ app.post('/api/recommendations', async (req, res) => {
   }
 });
 
-// Helper function to parse price range
-function parsePriceRange(priceRange) {
-  if (!priceRange || priceRange === 'No preference') {
-    return { min: 0, max: Infinity };
-  }
-  
-  const ranges = {
-    'Under $25': { min: 0, max: 25 },
-    'Under $30': { min: 0, max: 30 },
-    'Under $50': { min: 0, max: 50 },
-    'Under $100': { min: 0, max: 100 },
-    'Under $200': { min: 0, max: 200 },
-    'Under $300': { min: 0, max: 300 },
-    '$25 - $50': { min: 25, max: 50 },
-    '$30 - $50': { min: 30, max: 50 },
-    '$50 - $80': { min: 50, max: 80 },
-    '$50 - $100': { min: 50, max: 100 },
-    '$80 - $120': { min: 80, max: 120 },
-    '$100 - $150': { min: 100, max: 150 },
-    '$100 - $200': { min: 100, max: 200 },
-    '$120 - $180': { min: 120, max: 180 },
-    '$150 - $250': { min: 150, max: 250 },
-    '$200 - $300': { min: 200, max: 300 },
-    '$200 - $400': { min: 200, max: 400 },
-    '$300 - $500': { min: 300, max: 500 },
-    '$400 - $600': { min: 400, max: 600 },
-    '$500 - $700': { min: 500, max: 700 },
-    '$600 - $800': { min: 600, max: 800 },
-    '$700 - $900': { min: 700, max: 900 },
-    '$20 - $40': { min: 20, max: 40 },
-    '$40 - $60': { min: 40, max: 60 },
-    '$60 - $80': { min: 60, max: 80 },
-    '$180+': { min: 180, max: Infinity },
-    '$250+': { min: 250, max: Infinity },
-    '$300+': { min: 300, max: Infinity },
-    '$500+': { min: 500, max: Infinity },
-    '$800+': { min: 800, max: Infinity },
-    '$900+': { min: 900, max: Infinity },
-    '$80+': { min: 80, max: Infinity },
-    '$120+': { min: 120, max: Infinity },
-    '$150+': { min: 150, max: Infinity },
-    '$1000+': { min: 1000, max: Infinity }
-  };
-  
-  return ranges[priceRange] || { min: 0, max: Infinity };
-}
-
 // ======= SIZING CALCULATION FUNCTIONS =======
 
 // Parse height from various formats to inches

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig';
 
 const Container = styled.div`
   width: 100vw;
@@ -223,7 +224,7 @@ const Analytics: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/analytics/overview', {
+      const response = await fetch(`${API_BASE_URL}/api/analytics/overview`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

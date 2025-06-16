@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { ProductSpecifications, SpecificationRange } from '../types';
+import { API_BASE_URL } from '../apiConfig';
 
 const Container = styled.div`
   width: 100vw;
@@ -314,7 +315,7 @@ const EditProduct: React.FC = () => {
   const loadProduct = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/products/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -392,7 +393,7 @@ const EditProduct: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/products/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

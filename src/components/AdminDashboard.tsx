@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../apiConfig';
 
 const AdminContainer = styled.div`
   width: 100vw;
@@ -239,7 +240,7 @@ const AdminDashboard: React.FC = () => {
   const loadProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
