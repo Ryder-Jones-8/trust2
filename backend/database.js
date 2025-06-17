@@ -1,17 +1,31 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Database connection pool
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'trust_platform',
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// Database connection pool - handles both local and cloud environments
+let pool;
+
+if (process.env.DATABASE_URL) {
+  // Cloud environment - use DATABASE_URL
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+} else {
+  // Local environment - use individual environment variables
+  pool = new Pool({
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'trust_platform',
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT || 5432,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  });
+}
 
 // Test database connection
 pool.on('connect', () => {
