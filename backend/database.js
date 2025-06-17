@@ -5,14 +5,17 @@ require('dotenv').config();
 let pool;
 
 if (process.env.DATABASE_URL) {
-  // Cloud environment - use DATABASE_URL
+  // Cloud environment - use DATABASE_URL (for Neon/Render)
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: {
+      rejectUnauthorized: false
+    },
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 20000, // Increased timeout for cloud
   });
+  console.log('🌐 Using cloud database connection');
 } else {
   // Local environment - use individual environment variables
   pool = new Pool({
@@ -25,6 +28,7 @@ if (process.env.DATABASE_URL) {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
   });
+  console.log('🏠 Using local database connection');
 }
 
 // Test database connection
