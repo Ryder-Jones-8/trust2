@@ -56,6 +56,13 @@ A tablet-based platform designed specifically for surf, ski, and skate shops to 
 
 4. Open your browser and navigate to `http://localhost:5173` (or the port shown in terminal)
 
+5. **Optional: Access from other devices**
+   - Edit `.env` in the project root and set `VITE_API_URL` to the IP address of the machine running the backend. For example:
+     ```env
+     VITE_API_URL=http://192.168.1.10:3001
+     ```
+   - Restart the Vite server after saving the file so the new URL is used.
+
 ### Available Scripts
 
 - `npm run dev` - Start development server

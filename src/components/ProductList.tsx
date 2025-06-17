@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../apiConfig';
@@ -289,9 +289,30 @@ const ProductList: React.FC = () => {
     loadProducts();
   }, []);
 
+  const filterProducts = useCallback(() => {
+    let filtered = products;
+
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    if (sportFilter) {
+      filtered = filtered.filter(product => product.sport === sportFilter);
+    }
+
+    if (categoryFilter) {
+      filtered = filtered.filter(product => product.category === categoryFilter);
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, searchTerm, sportFilter, categoryFilter]);
+
   useEffect(() => {
     filterProducts();
-  }, [products, searchTerm, sportFilter, categoryFilter]);
+  }, [filterProducts]);
 
   const loadProducts = async () => {
     console.log('🔄 DEBUG: Starting loadProducts function...');
@@ -374,26 +395,6 @@ const ProductList: React.FC = () => {
     }
   };
 
-  const filterProducts = () => {
-    let filtered = products;
-
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    if (sportFilter) {
-      filtered = filtered.filter(product => product.sport === sportFilter);
-    }
-
-    if (categoryFilter) {
-      filtered = filtered.filter(product => product.category === categoryFilter);
-    }
-
-    setFilteredProducts(filtered);
-  };
   const handleDelete = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) {
       return;

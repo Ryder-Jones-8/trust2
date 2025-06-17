@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { ProductSpecifications, SpecificationRange } from '../types';
@@ -306,13 +306,7 @@ const EditProduct: React.FC = () => {
   });
   const [specifications, setSpecifications] = useState<ProductSpecifications>({});
 
-  useEffect(() => {
-    if (id) {
-      loadProduct();
-    }
-  }, [id]);
-
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
@@ -348,7 +342,15 @@ const EditProduct: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      loadProduct();
+    }
+  }, [id, loadProduct]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,

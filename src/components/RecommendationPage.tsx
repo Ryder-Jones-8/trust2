@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import type { RecommendationProduct } from '../types'
 import type { FormData as CustomFormData } from '../types'
@@ -378,12 +378,7 @@ const RecommendationPage = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (sport && category) {
-      fetchRecommendations()
-    }
-  }, [sport, category, formData])
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -425,7 +420,13 @@ const RecommendationPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [sport, category, formData])
+
+  useEffect(() => {
+    if (sport && category) {
+      fetchRecommendations()
+    }
+  }, [sport, category, fetchRecommendations])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

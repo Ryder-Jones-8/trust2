@@ -97,3 +97,13 @@ After both servers are running:
 5. Test snowboard recommendations on user side
 
 The network error should be completely resolved once the backend server is running! 🎉
+
+## Accessing the App from Other Devices
+
+If you plan to open the frontend from another machine (tablet, phone, or a shop kiosk), update the API URL in the root `.env` file:
+
+```env
+VITE_API_URL=http://<your-server-ip>:3001
+```
+
+Replace `<your-server-ip>` with the LAN or public IP address of the computer running the backend server. After editing the file, restart the Vite dev server (or rebuild) so the new URL is used.

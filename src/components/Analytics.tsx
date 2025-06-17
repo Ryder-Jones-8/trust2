@@ -281,7 +281,7 @@ const Analytics: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     loadAnalyticsData();
