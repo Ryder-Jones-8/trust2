@@ -125,7 +125,7 @@ const SubmitButton = styled.button`
   width: 100%;
   padding: 1rem;
   background-color: ${props => props.theme.colors.text};
-  color: ${props => props.theme.colors.primary};
+  color: #000000 !important;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -135,9 +135,13 @@ const SubmitButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;
+  -webkit-appearance: none;
+  -webkit-text-fill-color: #000000;
   
   &:hover {
     background-color: ${props => props.theme.colors.textSecondary};
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000;
   }
 `
 
