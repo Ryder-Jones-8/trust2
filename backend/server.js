@@ -1429,9 +1429,10 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 trust. platform backend running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 Network access: http://0.0.0.0:${PORT}/api/health`);
 });
 
 // Graceful shutdown
