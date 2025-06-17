@@ -102,7 +102,7 @@ Write-Host "===================================================" -ForegroundColo
 Write-Host ""
 
 Write-Host "To start the servers:" -ForegroundColor Green
-Write-Host "  Backend:  cd backend && npm start" -ForegroundColor White
+Write-Host "  Backend:  cd backend; npm start" -ForegroundColor White
 Write-Host "  Frontend: npm run dev" -ForegroundColor White
 Write-Host ""
 
